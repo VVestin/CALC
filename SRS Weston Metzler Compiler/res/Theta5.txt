@@ -1,0 +1,13 @@
+2->C
+Lbl DEF
+.67->a
+b^1.2->b
+5->A
+7(b>.5)+1->B
+A/b->a
+B+A->b
+b+a->B
+Disp(A=b)/B+a
+C--
+If c>0
+Goto DEF

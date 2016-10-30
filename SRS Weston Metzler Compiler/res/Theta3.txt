@@ -1,0 +1,16 @@
+9/4*6(A+B+1)->B
+B^3xB
+If B>0
+50->B
+ElseIf abs(B)=/=6 and B<=7
+Disp (2B-1)/5
+End
+Pause
+0->A
+While A<5
+Disp A
+2A-B+B->A
+End
+For(C,-2,2,2
+Disp C/2
+End

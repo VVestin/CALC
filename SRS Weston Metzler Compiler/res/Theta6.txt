@@ -1,0 +1,9 @@
+"123"->Str1
+"32"+Str1->Str1
+Disp Str1
+sub(str1,0,2->Str2
+4inString(Str1,"2"->A
+Str1+A->Str1
+sub(Str1,1,length(Str1)-1->Str1
+Disp Str1
+Disp Str2
