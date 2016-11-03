@@ -42,14 +42,14 @@ public class Lexer {
 				tokens.add(new Token(TokenClass.STRING_LITERAL, src.substring(0, strEnd)));
 				src = src.substring(strEnd);
 			} else if (src.startsWith(".") || isNum(src.charAt(0))) {
-				boolean decimal;
-				boolean number;
+				boolean decimal = false;
+				boolean number = false;
 				int index = 0;
 				while (src.charAt(index) == '.' || isNum(src.charAt(index))) {
 					if (src.charAt(index) == '.') {
 						if (decimal)
 							// TODO add line numbers to exceptions
-							throw new RuntimeException("Lexical Analysis failed. Single '.' cannot be tokenized on line: ");
+							throw new RuntimeException("Lexical Analysis failed. Multiple decimals in a Number Literal: ");
 						decimal = true;
 					} else {
 						number = true;
