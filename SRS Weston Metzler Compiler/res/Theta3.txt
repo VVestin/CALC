@@ -11,6 +11,6 @@ While A<5
 Disp A
 2A-B+B->A
 End
-For(C,-2,2,2
+For(C,_2,2,2
 Disp C/2
 End

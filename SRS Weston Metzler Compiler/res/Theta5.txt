@@ -8,6 +8,6 @@ A/b->a
 B+A->b
 b+a->B
 Disp(A=b)/B+a
-C--
+C-1->C
 If c>0
 Goto DEF
