@@ -10,7 +10,7 @@ import in.vvest.lexer.Token;
 public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
-		Lexer lex = new Lexer(new File("res/Theta3.txt"));
+		Lexer lex = new Lexer(new File("res/Theta6.txt"));
 		List<Token> tokens = lex.tokenize();
 		System.out.println(tokens);
 	}

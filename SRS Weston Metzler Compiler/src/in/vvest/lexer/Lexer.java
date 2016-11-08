@@ -60,6 +60,7 @@ public class Lexer {
 				// tokenized
 				// within a string literal (unlike TI-BASIC onCalc)
 				int strEnd = src.indexOf("\"", 1);
+				if (strEnd != -1) strEnd++;
 				if (src.indexOf(":") < strEnd || strEnd == -1)
 					strEnd = src.indexOf(";");
 				if (src.indexOf("->") < strEnd || strEnd == -1)
@@ -92,7 +93,7 @@ public class Lexer {
 				tokens.add(new Token(numType, src.substring(0, index)));
 				src = src.substring(index);
 			} else if (src.startsWith("Str")) {
-				if (isNum(src.charAt(3)))
+				if (!isNum(src.charAt(3)))
 					throw new RuntimeException(
 							"Lexical Analysis Failed. Unsupported String literal " + src.substring(0, 4));
 				tokens.add(new Token(TokenClass.STRING_LITERAL, src.substring(0, 4)));
