@@ -1,4 +1,7 @@
+?Hello
 1->A
 3*4+6->B
-Disp A
+?This is a Comment
+Disp A:?Inline comment
 Disp B
+?Do not compile this

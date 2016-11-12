@@ -27,7 +27,7 @@ public class Token {
 	}
 	
 	public String toString() {
-		return "[" + type + " " + value + "]" + (value.equals(":") ? "\n" : " ");
+		return (value.equals(":") ? "\n" : " ") + "[" + type + " " + value + "]";
 	}
 	
 }
