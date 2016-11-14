@@ -22,7 +22,7 @@ public enum TI84Token {
 	INPUT(TokenClass.COMMAND, "input "),
 	IN_STRING(TokenClass.FUNCTION, "inString("),
 	INT(TokenClass.FUNCTION, "int("),
-	I_PART(TokenClass.FUNCTION, "I_PART"),
+	I_PART(TokenClass.FUNCTION, "iPart("),
 	LABEL(TokenClass.KEYWORD, "Lbl "),
 	LENGTH(TokenClass.FUNCTION, "length("),
 	LOG_BASE(TokenClass.FUNCTION, "logBASE("),
@@ -57,8 +57,11 @@ public enum TI84Token {
 	private String text;
 	
 	TI84Token(TokenClass type, String text) {
-		token = new Token(type, text);
-		 this.text = text;
+		String tokenValue = text.trim().toLowerCase();
+		if (tokenValue.endsWith("(")) 
+			tokenValue = tokenValue.substring(0, tokenValue.length() - 1);
+		token = new Token(type, tokenValue);
+		this.text = text;
 	}
 
 	public Token getToken() {

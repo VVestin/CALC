@@ -8,21 +8,32 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 
+// Note to self: this class is not really a class, 
+// just a Java way to make a function. It might be 
+// considered bad practice, but it doesn't logically 
+// fit into any class, it is a function.
+// Also note, it uses lots of lookahead, but that is
+// tolerable, because it only requires lookahead for 
+// tokens that would already be tokens on the calc.
 public class Lexer {
-
+	private static final String COMMENT_CHARACTER = "?";
+	
 	private String src;
 
-	public Lexer(File f) {
+	public Lexer(String s) {
+		this(new Scanner(s));
+	}
+	
+	public Lexer(File f) throws FileNotFoundException {
+		this(new Scanner(f));
+	}
+	
+	public Lexer(Scanner s) {
 		src = "";
-		try {
-			Scanner s = new Scanner(f);
-			while (s.hasNextLine()) {
-				src += s.nextLine() + ":";
-			}
-			s.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+		while (s.hasNextLine()) {
+			src += ":" + s.nextLine();
 		}
+		s.close();
 	}
 
 	public List<Token> tokenize() {
@@ -43,6 +54,7 @@ public class Lexer {
 		singleCharToks.put(")", TokenClass.CLOSE_PAREN);
 		System.out.println(src);
 		while (src.length() > 0) {
+			System.out.println("DEBUG: " + src);
 			// Tokenizes the symbols in the src code that would normally be
 			// tokens on the TI-84
 			// In ASM, might have to replace with something similiar to assign a
@@ -51,6 +63,8 @@ public class Lexer {
 				if (src.startsWith(s.getText())) {
 					tokens.add(s.getToken());
 					src = src.substring(s.getText().length());
+					System.out.println("YOOYO: " + src);
+					System.out.println("TUULO: " + s.getText());
 					continue;
 				}
 			}
@@ -69,11 +83,16 @@ public class Lexer {
 					strEnd = src.length();
 				tokens.add(new Token(TokenClass.STRING_LITERAL, src.substring(0, strEnd)));
 				src = src.substring(strEnd);
+			} else if (src.startsWith(":" + COMMENT_CHARACTER)) { 
+				int commentEnd = src.indexOf(":", 2);
+				System.out.println(commentEnd);
+				if (commentEnd == -1) break;
+				src = src.substring(commentEnd);
 			} else if (src.startsWith(".") || isNum(src.charAt(0))) {
 				boolean decimal = false;
 				boolean number = false;
 				int index = 0;
-				while (src.charAt(index) == '.' || isNum(src.charAt(index))) {
+				while (index < src.length() && (src.charAt(index) == '.' || isNum(src.charAt(index)))) {
 					if (src.charAt(index) == '.') {
 						if (decimal)
 							// TODO add line numbers to exceptions
@@ -114,7 +133,7 @@ public class Lexer {
 				tokens.add(new Token(singleCharToks.get(src.substring(0, 1)), src.substring(0, 1)));
 				src = src.substring(1);
 			} else {
-				System.err.println("Unable to lex: " + src.charAt(0) + ". Continuing with rest of input");
+				System.err.println("Unable to lex: '" + src.charAt(0) + "'. Continuing with rest of input");
 				src = src.substring(1);
 			}
 		}

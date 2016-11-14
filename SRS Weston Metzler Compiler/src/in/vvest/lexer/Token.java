@@ -26,8 +26,12 @@ public class Token {
 		this.value = value;
 	}
 	
+	public boolean equals(Token t) {
+		return t.getType() == type && t.getValue().equals(value);
+	}
+	
 	public String toString() {
-		return (value.equals(":") ? "\n" : " ") + "[" + type + " " + value + "]";
+		return (value.equals(":") ? "\n" : "") + "[" + type + " " + value + "]";
 	}
 	
 }
