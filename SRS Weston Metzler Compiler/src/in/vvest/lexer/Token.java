@@ -32,6 +32,5 @@ public class Token {
 	
 	public String toString() {
 		return (value.equals(":") ? "\n" : "") + "[" + type + " " + value + "]";
-	}
-	
+	}	
 }

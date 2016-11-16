@@ -1,6 +1,7 @@
 package in.vvest.parser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import in.vvest.lexer.Token;
@@ -17,6 +18,10 @@ public class TreeNode {
 	public void print() {
         print("", true);
     }
+	
+	public void reverseChildren() {
+		Collections.reverse(children);
+	}
 
     private void print(String prefix, boolean isTail) {
         System.out.println(prefix + "+--" + t);

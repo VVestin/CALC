@@ -14,11 +14,13 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
 		//src = new Scanner(new File("res/Theta1.txt"));
-		src = new Scanner("(2+min(sin(0,2),cos(48+10*2)))/(4*5)");
+		src = new Scanner(
+				"min(1,min(4,5,6),3)");
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		System.out.println(tokens);
 		TreeNode ast = Parser.parse(tokens);
+		System.out.println("\nPrinting AST:");
 		ast.print();
 	}
 

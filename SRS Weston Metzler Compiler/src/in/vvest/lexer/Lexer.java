@@ -53,8 +53,8 @@ public class Lexer {
 		singleCharToks.put("(", TokenClass.OPEN_PAREN);
 		singleCharToks.put(")", TokenClass.CLOSE_PAREN);
 		System.out.println(src);
+	OuterLoop:
 		while (src.length() > 0) {
-			System.out.println("DEBUG: " + src);
 			// Tokenizes the symbols in the src code that would normally be
 			// tokens on the TI-84
 			// In ASM, might have to replace with something similiar to assign a
@@ -63,9 +63,7 @@ public class Lexer {
 				if (src.startsWith(s.getText())) {
 					tokens.add(s.getToken());
 					src = src.substring(s.getText().length());
-					System.out.println("YOOYO: " + src);
-					System.out.println("TUULO: " + s.getText());
-					continue;
+					continue OuterLoop;
 				}
 			}
 			if (src.startsWith("\"")) {
