@@ -17,17 +17,17 @@ import java.util.TreeMap;
 // tokens that would already be tokens on the calc.
 public class Lexer {
 	private static final String COMMENT_CHARACTER = "?";
-	
+
 	private String src;
 
 	public Lexer(String s) {
 		this(new Scanner(s));
 	}
-	
+
 	public Lexer(File f) throws FileNotFoundException {
 		this(new Scanner(f));
 	}
-	
+
 	public Lexer(Scanner s) {
 		src = "";
 		while (s.hasNextLine()) {
@@ -53,8 +53,8 @@ public class Lexer {
 		singleCharToks.put("(", TokenClass.OPEN_PAREN);
 		singleCharToks.put(")", TokenClass.CLOSE_PAREN);
 		System.out.println(src);
-	OuterLoop:
-		while (src.length() > 0) {
+		// Who know java has labels?
+		OuterLoop: while (src.length() > 0) {
 			// Tokenizes the symbols in the src code that would normally be
 			// tokens on the TI-84
 			// In ASM, might have to replace with something similiar to assign a
@@ -72,19 +72,22 @@ public class Lexer {
 				// tokenized
 				// within a string literal (unlike TI-BASIC onCalc)
 				int strEnd = src.indexOf("\"", 1);
-				if (strEnd != -1) strEnd++;
-				if (src.indexOf(":") < strEnd || strEnd == -1)
-					strEnd = src.indexOf(";");
-				if (src.indexOf("->") < strEnd || strEnd == -1)
+				if (strEnd != -1)
+					strEnd++;
+				// TODO fix bug with parsing Strings that have a real : in them, not a line break
+				if (src.indexOf(":") < strEnd && src.indexOf(":") != -1 || strEnd == -1)
+					strEnd = src.indexOf(":");
+				if (src.indexOf("->") < strEnd && src.indexOf(":") != -1 || strEnd == -1)
 					strEnd = src.indexOf("->");
 				if (strEnd == -1)
 					strEnd = src.length();
 				tokens.add(new Token(TokenClass.STRING_LITERAL, src.substring(0, strEnd)));
 				src = src.substring(strEnd);
-			} else if (src.startsWith(":" + COMMENT_CHARACTER)) { 
+			} else if (src.startsWith(":" + COMMENT_CHARACTER)) {
 				int commentEnd = src.indexOf(":", 2);
 				System.out.println(commentEnd);
-				if (commentEnd == -1) break;
+				if (commentEnd == -1)
+					break;
 				src = src.substring(commentEnd);
 			} else if (src.startsWith(".") || isNum(src.charAt(0))) {
 				boolean decimal = false;

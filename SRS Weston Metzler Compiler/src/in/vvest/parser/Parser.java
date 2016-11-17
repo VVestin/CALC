@@ -14,11 +14,9 @@ import in.vvest.lexer.TokenClass;
 public class Parser {
 
 	private static final Set<TokenClass> VALUE_TOKENS = new HashSet<TokenClass>(
-			Arrays.asList(TokenClass.FIXED_LITERAL, TokenClass.FIXED_VAR, TokenClass.INT_LITERAL, TokenClass.INT_VAR,
-					TokenClass.STRING_LITERAL, TokenClass.STRING_VAR, TokenClass.MATRIX_VAR));
+			Arrays.asList(TokenClass.FIXED_LITERAL, TokenClass.FIXED_VAR, TokenClass.INT_LITERAL, TokenClass.INT_VAR,TokenClass.STRING_LITERAL, TokenClass.STRING_VAR, TokenClass.MATRIX_VAR));
 	private static final Set<Token> CONTROLL_STRUCTS = new HashSet<Token>(Arrays.asList(TI84Token.IF.getToken(), TI84Token.WHILE.getToken(), TI84Token.REPEAT.getToken(), TI84Token.FOR.getToken()));
-	private static final Set<String> BINARY_OPS = new HashSet<String>(
-			Arrays.asList("+", "-", "/", "*", "^", "and", "or", "xor"));
+	private static final Set<String> BINARY_OPS = new HashSet<String>(	Arrays.asList("+", "-", "/", "*", "^", "and", "or", "xor", "->", "=", "=/=", "<", ">", "<=", ">="));
 
 	// Higher precedence is a lower index
 	private static final String[][] OPERATOR_PRECEDENCE = { { "_" }, { "*", "/" }, { "+", "-" },
@@ -28,9 +26,27 @@ public class Parser {
 		Stack<Token> operatorStack = new Stack<Token>();
 		Stack<TreeNode> rpn = new Stack<TreeNode>();
 		Iterator<Token> it = src.iterator();
+		boolean newLine = false;
+		boolean endLine = false;
 		while (it.hasNext()) {
 			Token next = it.next();
-			if (VALUE_TOKENS.contains(next.getType())) {
+			if (next.getType() == TokenClass.COLON) {
+				newLine = true;
+				endLine = false;
+				operatorStack.push(next);
+				continue;
+			} else if (endLine) { 
+				System.err.println("Parse Error. Instructions must be on their own lines");
+			} else if (next.getType() == TokenClass.STO) {
+				while (operatorStack.peek().getType() != TokenClass.COLON)
+					pushOperator(rpn, operatorStack.pop());
+				operatorStack.pop();
+				if (!it.hasNext())
+					System.err.println("Parse Error. Assignment operator has no right side.");
+				pushOperator(rpn, it.next());
+				pushOperator(rpn, next);
+				endLine = true;
+			} else if (VALUE_TOKENS.contains(next.getType())) {
 				rpn.push(new TreeNode(next));
 			} else if (next.getType() == TokenClass.OPERATOR || next.getType() == TokenClass.NEGATIVE) {
 				while (!operatorStack.isEmpty() && higherPriority(operatorStack.peek().getValue(), next.getValue())) {
@@ -47,26 +63,34 @@ public class Parser {
 						|| operatorStack.peek().getType() == TokenClass.FUNCTION)) {
 					pushOperator(rpn, operatorStack.pop());
 				}
-				Token openToken = operatorStack.pop(); // Token which matches
-														// the close paren
+				Token openToken = operatorStack.pop(); // Token which matches the close paren
 				if (openToken.getType() == TokenClass.FUNCTION)
 					pushOperator(rpn, openToken);
 			} else if (next.equals(TI84Token.END.getToken())) {
-				System.out.println("operatorStack " + operatorStack);
-				System.out.println("rpn " + rpn);
 				while (!CONTROLL_STRUCTS.contains(operatorStack.peek())) {
 					pushOperator(rpn, operatorStack.pop());
 				}
 				pushOperator(rpn, operatorStack.pop());
+				endLine = true;
+			} else if (next.getType() == TokenClass.COMMAND) {
+				if (!newLine) {
+					System.err.println("Parse Error. Cannot execute " + next + " inline");
+				} else {
+					pushOperator(rpn, next);
+					endLine = true;
+				}
 			}
+			newLine = false;
 		}
 		while (!operatorStack.isEmpty()) {
 			pushOperator(rpn, operatorStack.pop());
 		}
-		if (rpn.size() != 1)
-			System.err.println("Parse Error. Parse Tree does not include entire expression.");
-		rpn.peek().reverseChildren();
-		return rpn.pop();
+		TreeNode program = new TreeNode(null);
+		while (!rpn.isEmpty()) {
+			program.children.add(rpn.pop());
+		}
+		program.reverseChildren();
+		return program;
 	}
 
 	private static void pushOperator(Stack<TreeNode> stack, Token operator) {
@@ -77,10 +101,11 @@ public class Parser {
 		} else if (operator.getType() == TokenClass.NEGATIVE) {
 			n.children.add(stack.pop());
 		} else if (operator.getType() == TokenClass.FUNCTION || CONTROLL_STRUCTS.contains(operator)) {
-			System.out.println(stack + " processing" + operator);
-			while (!stack.peek().t.equals(operator) || !(stack.peek().t instanceof MarkerToken))
+			while (!(stack.peek().t.equals(operator) && (stack.peek().t instanceof MarkerToken)))
 				n.children.add(stack.pop());
 			stack.pop();
+		} else if (operator.getType() == TokenClass.COLON) {
+			return;
 		}
 		stack.push(n);
 	}

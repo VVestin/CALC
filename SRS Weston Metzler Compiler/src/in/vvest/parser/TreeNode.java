@@ -21,16 +21,23 @@ public class TreeNode {
 	
 	public void reverseChildren() {
 		Collections.reverse(children);
+		for (int i = 0; i < children.size(); i++)
+			children.get(i).reverseChildren();
 	}
 
     private void print(String prefix, boolean isTail) {
-        System.out.println(prefix + "+--" + t);
-        for (int i = 0; i < children.size() - 1; i++) {
-            children.get(i).print(prefix + (isTail ? "   " : "|  "), false);
-        }
-        if (children.size() > 0) {
-            children.get(children.size() - 1).print(prefix + (isTail ?"   " : "|  "), true);
-        }
+    	if (t == null) {
+    		for (int i = 0; i < children.size(); i++)
+    			children.get(i).print();
+    	} else {
+	        System.out.println(prefix + "+--" + t);
+	        for (int i = 0; i < children.size() - 1; i++) {
+	            children.get(i).print(prefix + (isTail ? "   " : "|  "), false);
+	        }
+	        if (children.size() > 0) {
+	            children.get(children.size() - 1).print(prefix + (isTail ?"   " : "|  "), true);
+	        }
+    	}
     }
 	
 	public String toString() {

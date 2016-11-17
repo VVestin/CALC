@@ -7,7 +7,7 @@ b^1.2->b
 A/b->a
 B+A->b
 b+a->B
-Disp(A=b)/B+a
+Disp((A=b)/B+a)
 C-1->C
 If c>0
 Goto DEF

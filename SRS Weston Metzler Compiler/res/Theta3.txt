@@ -1,16 +1,17 @@
 9/4*6(A+B+1)->B
-B^3->B
+B*3->B
 If B>0
 50->B
-ElseIf abs(B)=/=6 and B<=7
-Disp (2B-1)/5
+If abs(B)=/=6 and B<=7
+Disp((2B-1)/5)
 End
-Pause 
+End
+Pause
 1->A
 While A<5
-Disp A
+Disp(A)
 2A-B+B->A
 End
 For(C,_2,2,2
-Disp C/2
+Disp(C/2)
 End

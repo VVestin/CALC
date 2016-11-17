@@ -17,6 +17,6 @@ public enum TokenClass {
 	COLON,				// :
 	OPERATOR,			// +, -, *, /, and, or, >, =, etc.
 	KEYWORD,			// Token with special meaning
-	COMMAND,			// Does something. Returns no value
 	FUNCTION,			// Takes arguments and returns a value
+	COMMAND,			// Takes no arguments, performs task (similar to keyword).
 }
