@@ -1,6 +1,5 @@
 package in.vvest.main;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Scanner;
@@ -14,8 +13,8 @@ public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
-		src = new Scanner(new File("res/Theta4.txt"));
-		//src = new Scanner("1+2->A:30*1->B");
+		//src = new Scanner(new File("res/Theta7.txt"));
+		src = new Scanner("Output(1,,2,,3,,)");
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		System.out.println(tokens);

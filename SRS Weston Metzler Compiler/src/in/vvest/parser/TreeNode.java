@@ -15,6 +15,22 @@ public class TreeNode {
 		children = new ArrayList<TreeNode>();
 	}
 	
+	public Token getToken() {
+		return t;
+	}
+
+	public void setToken(Token t) {
+		this.t = t;
+	}
+
+	public List<TreeNode> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<TreeNode> children) {
+		this.children = children;
+	}
+
 	public void print() {
         print("", true);
     }

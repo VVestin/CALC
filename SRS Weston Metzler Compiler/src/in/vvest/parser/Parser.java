@@ -13,8 +13,7 @@ import in.vvest.lexer.TokenClass;
 
 public class Parser {
 
-	private static final Set<TokenClass> VALUE_TOKENS = new HashSet<TokenClass>(
-			Arrays.asList(TokenClass.FIXED_LITERAL, TokenClass.FIXED_VAR, TokenClass.INT_LITERAL, TokenClass.INT_VAR,TokenClass.STRING_LITERAL, TokenClass.STRING_VAR, TokenClass.MATRIX_VAR));
+	private static final Set<TokenClass> VALUE_TOKENS = new HashSet<TokenClass>(Arrays.asList(TokenClass.FIXED_LITERAL, TokenClass.FIXED_VAR, TokenClass.INT_LITERAL, TokenClass.INT_VAR,TokenClass.STRING_LITERAL, TokenClass.STRING_VAR, TokenClass.MATRIX_VAR));
 	private static final Set<Token> CONTROLL_STRUCTS = new HashSet<Token>(Arrays.asList(TI84Token.IF.getToken(), TI84Token.WHILE.getToken(), TI84Token.REPEAT.getToken(), TI84Token.FOR.getToken()));
 	private static final Set<String> BINARY_OPS = new HashSet<String>(	Arrays.asList("+", "-", "/", "*", "^", "and", "or", "xor", "->", "=", "=/=", "<", ">", "<=", ">="));
 

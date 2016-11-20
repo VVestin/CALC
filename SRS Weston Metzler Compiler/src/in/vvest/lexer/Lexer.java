@@ -59,6 +59,7 @@ public class Lexer {
 			// tokens on the TI-84
 			// In ASM, might have to replace with something similiar to assign a
 			// TokenClass
+			System.out.println("DEBUG: " + src);
 			for (TI84Token s : TI84Token.values()) {
 				if (src.startsWith(s.getText())) {
 					tokens.add(s.getToken());
@@ -77,7 +78,7 @@ public class Lexer {
 				// TODO fix bug with parsing Strings that have a real : in them, not a line break
 				if (src.indexOf(":") < strEnd && src.indexOf(":") != -1 || strEnd == -1)
 					strEnd = src.indexOf(":");
-				if (src.indexOf("->") < strEnd && src.indexOf(":") != -1 || strEnd == -1)
+				if (src.indexOf("->") < strEnd && src.indexOf("->") != -1 || strEnd == -1)
 					strEnd = src.indexOf("->");
 				if (strEnd == -1)
 					strEnd = src.length();
@@ -134,7 +135,8 @@ public class Lexer {
 				tokens.add(new Token(singleCharToks.get(src.substring(0, 1)), src.substring(0, 1)));
 				src = src.substring(1);
 			} else {
-				System.err.println("Unable to lex: '" + src.charAt(0) + "'. Continuing with rest of input");
+				System.out.println("\n" + src + "\n");
+				System.err.println("Lexical Analysis Failed. Unable to lex: '" + src.charAt(0) + "'. Continuing with rest of input");
 				src = src.substring(1);
 			}
 		}
