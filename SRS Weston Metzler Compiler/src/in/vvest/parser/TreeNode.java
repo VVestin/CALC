@@ -35,6 +35,10 @@ public class TreeNode {
         print("", true);
     }
 	
+	public boolean hasChildren() {
+		return !children.isEmpty();
+	}
+	
 	public void reverseChildren() {
 		Collections.reverse(children);
 		for (int i = 0; i < children.size(); i++)
