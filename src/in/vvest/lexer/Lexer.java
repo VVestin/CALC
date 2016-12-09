@@ -52,14 +52,12 @@ public class Lexer {
 		singleCharToks.put(":", TokenClass.COLON);
 		singleCharToks.put("(", TokenClass.OPEN_PAREN);
 		singleCharToks.put(")", TokenClass.CLOSE_PAREN);
-		System.out.println(src);
-		// Who know java has labels?
+		// Who knew java has labels?
 		OuterLoop: while (src.length() > 0) {
 			// Tokenizes the symbols in the src code that would normally be
 			// tokens on the TI-84
 			// In ASM, might have to replace with something similiar to assign a
 			// TokenClass
-			System.out.println("DEBUG: " + src);
 			for (TI84Token s : TI84Token.values()) {
 				if (src.startsWith(s.getText())) {
 					tokens.add(s.getToken());
