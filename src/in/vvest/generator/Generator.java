@@ -1,5 +1,8 @@
 package in.vvest.generator;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,15 +17,31 @@ public class Generator {
 	
 	public static List<String> generateCode(TreeNode prgm) {
 		List<String> code = new ArrayList<String>();
+		code.add("#include \"ti83plus.inc\"");
+		code.add("#define progStart $9D95");
+		code.add("#define TEMP_SIZE $100");
+		code.add(".org progStart-2");
+		code.add(".db $BB,$6D");
+		code.add("");
 		for (TreeNode statement : prgm.getChildren()) {
 			gen(statement, code);
 		}
 		code.add("ret");
+		code.add("");
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader("res/lib.z80"));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				code.add(line);
+			}
+			reader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return code;
 	}
 
 	private static void gen(TreeNode t, List<String> code) {
-		System.out.println("GENERATING " + t.getToken());
 		if (t.getToken().getType() == TokenClass.INT_LITERAL) {
 			pushBytes(decToHex(t.getToken().getValue()), code);
 		} else if (t.getToken().equals(TI84Token.DISP.getToken())) {
@@ -41,7 +60,6 @@ public class Generator {
 				code.add("call Add");
 			}
 		} else if (t.getToken().equals(TI84Token.STO.getToken())) {
-			System.out.println("Storing to a variable: ");
 			if (t.getChildren().size() != 2)
 				System.err.println("Generation Error. Operator has too many operands somehow.");
 			gen(t.getChildren().get(0), code);
