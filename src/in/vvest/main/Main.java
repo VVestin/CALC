@@ -34,4 +34,9 @@ public class Main {
 		}
 	}
 
+	private static void compileWeb(List<String> code) {
+		URL url = new URL("http://clrhome.org/asm");
+		HttpURLConnection http = (HttpURLConection) url.openConection();
+		http.
+	}
 }
