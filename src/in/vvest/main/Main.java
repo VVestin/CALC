@@ -15,7 +15,7 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
 		//src = new Scanner(new File("res/Theta3.txt"));
-		src = new Scanner("30->A:Disp(A)");
+		src = new Scanner("300->A:Disp(A)");
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		System.out.println(tokens);
@@ -26,7 +26,11 @@ public class Main {
 		List<String> code = Generator.generateCode(ast);
 		System.out.println("Code:");
 		for (String line : code) {
-			System.out.println("\t" + line);
+			if (line.trim().endsWith(":")) {
+				System.out.println(line);
+			} else {
+				System.out.println("\t" + line);
+			}
 		}
 	}
 
