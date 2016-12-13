@@ -7,8 +7,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.List;
@@ -26,10 +28,10 @@ import in.vvest.parser.TreeNode;
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
-		//src = new Scanner(new File("res/Theta3.txt"));
-		src = new Scanner("Disp(30)");
+		src = new Scanner(new File("res/Theta1.txt"));
+		//src = new Scanner("30->B:Disp(B+3)");
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		//System.out.println(tokens);
@@ -55,17 +57,20 @@ public class Main {
 		http.setRequestMethod("POST");
 		http.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
+		PrintWriter print = new PrintWriter("out/asm.txt", "UTF-8");
 		StringBuilder prgm = new StringBuilder();
 		for (String statement : code) {
-			prgm.append((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") ? "" : "\t") + statement + "\n");
+			String line = (statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") ? "" : "\t") + statement;
+			prgm.append(URLEncoder.encode(line + "\n", "UTF-8"));
+			print.println(line);	
 		}
-		System.out.println(prgm);
+		print.close();
 		
 		http.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(http.getOutputStream());
 		wr.writeBytes(""
-				+ "action=b&"
-				+ "start=foo.z80&"
+				+ "action=p&"
+				+ "start=foo_z80&"
 				+ "foo_z80="
 				+ prgm);
 		wr.flush();
@@ -111,6 +116,7 @@ public class Main {
 	}
 	
 	private static void downloadPrgm(String download) throws IOException {
+		System.out.println("Downloading from " + download);
 		URL url = new URL(download);
 		ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 		FileOutputStream fos;

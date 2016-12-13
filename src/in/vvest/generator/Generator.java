@@ -22,12 +22,16 @@ public class Generator {
 		code.add("#define TEMP_SIZE $100");
 		code.add(".org progStart-2");
 		code.add(".db $BB,$6D");
-		code.add("");
+		code.add("bcall(_ClrLCDFull)");
+		code.add("bcall(_HomeUp)");
 		for (TreeNode statement : prgm.getChildren()) {
 			gen(statement, code);
 		}
 		code.add("ret");
 		code.add("");
+		for (String statement : code) {
+			System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") ? "" : "\t") + statement);
+		}
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("res/lib.z80"));
 			String line;
@@ -64,7 +68,7 @@ public class Generator {
 				System.err.println("Generation Error. Operator has too many operands somehow.");
 			gen(t.getChildren().get(0), code);
 			code.add("pop hl");
-			code.add("ld de,IntVar + " + 4 * (t.getChildren().get(1).getToken().getValue().charAt(0) - 'A'));
+			code.add("ld de,IntVar+" + 4 * (t.getChildren().get(1).getToken().getValue().charAt(0) - 'A'));
 			moveHLtoDE(4, code);
 		} else if (t.getToken().getType() == TokenClass.INT_VAR) {
 			code.add("ld de,IntVar + " + 4 * (t.getToken().getValue().charAt(0) - 'A'));
@@ -79,7 +83,7 @@ public class Generator {
 		code.add("ld (de),a");
 		code.add("inc hl");
 		code.add("inc de");
-		code.add("djnz _LoadBytesLoop" + labelIdentifier);
+		code.add("djnz _MoveBytesLoop" + labelIdentifier);
 	}
 
 	private static void pushBytes(String[] bytes, List<String> code) {
@@ -110,7 +114,7 @@ public class Generator {
 		code.add("dec hl");
 		code.add("dec hl");
 		code.add("push hl");
-		code.add("ld de," + tempPtr);
+		code.add("ld de,(" + tempPtr + ")");
 		code.add("ld h,0");
 		code.add("ld l,4");
 		code.add("add hl,de");

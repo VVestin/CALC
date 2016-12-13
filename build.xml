@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<project name="SRS_WM_Compiler" default="build">
+	<property name="src.dir" value="src/" />
+	<property name="res.dir" value="res/" />
+	<property name="bin.dir" value="bin/" />
+	<property name="exec.dir" value="exec/" />
+
+	<target name="build">
+		<mkdir dir="${bin.dir}" />
+		<javac destdir="${bin.dir}">
+			<src path="${src.dir}" />
+		</javac>
+	</target>
+
+	<target name="run" depends="build">	
+		<jar destfile="${exec.dir}/compile.jar" basedir="${bin.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="in.vvest.main.Main" />
+			</manifest>
+		</jar>
+		<java jar="${exec.dir}/compile.jar" fork="true" />
+	</target>
+		
+	<target name="clean">
+		<delete>
+			<fileset dir="${bin.dir}">
+				<include name="**/*.class" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="info">
+		<echo> Compiler for a TI-BASIC like language into z80 ASM </echo>
+	</target>
+</project>

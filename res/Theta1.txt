@@ -1,0 +1,8 @@
+?Hello
+1->A
+6->B
+?This is a Comment
+Disp(A+4):?Inline comment
+A+B->B
+Disp(B)
+?Do not compile this

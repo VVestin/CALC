@@ -1,27 +1,27 @@
 ;.module Add			; ORG IDE does not recognize .module directive :(
 ; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
-	pop		bc
-	pop		hl
-	pop		de
-	push		bc
-	ld			b,4
-	scf
-	ccf
+pop		bc
+pop		hl
+pop		de
+push		bc
+ld			b,4
+scf
+ccf
 _AddLoop:
-	ld			a,(de)
-	adc		a,(hl)
-	ld			(de),a
-	inc		hl
-	inc		de
-	djnz _AddLoop
-	dec		de
-	dec		de
-	dec		de
-	dec		de
-	pop		hl
-	push		de
-	jp			(hl)
+ld			a,(de)
+adc		a,(hl)
+ld			(de),a
+inc		hl
+inc		de
+djnz _AddLoop
+dec		de
+dec		de
+dec		de
+dec		de
+pop		hl
+push		de
+jp			(hl)
 
 ; .module		 Display
 ; Displays the number at the top of the hardware stack.
@@ -31,89 +31,89 @@ _AddLoop:
 ; TODO right justify
 ; TODO move number logic to a num2str function and make Disp function display strings
 Disp:
-	ld			hl,Billion			; HL is the base 10 number to subtract
-	pop		bc
-	pop		de					; DE is the number to display
-	push		bc
-	ld			b,10				; Number of digits needed to check at max
-	ld			c,0					; C counts how many subtractions occur before an overflow
+ld			hl,Billion			; HL is the base 10 number to subtract
+pop		bc
+pop		de					; DE is the number to display
+push		bc
+ld			b,10				; Number of digits needed to check at max
+ld			c,0					; C counts how many subtractions occur before an overflow
 _DispLoop:
-	push		bc
-	ld			b,3
-	scf
-	ccf
+push		bc
+ld			b,3
+scf
+ccf
 _DispSubLoop:
-	ld			a,(de)
-	sbc		a,(hl)
-	ld			(de),a
-	inc		hl
-	inc		de
-	djnz		_DispSubLoop
-	pop		bc
-	ld			a,(de)
-	sbc		a,(hl)				; Last subtraction goes outside of loop to check underflow
-	ld			(de),a
-	dec		de					; Reset DE for next subtraction.
-	dec		de
-	dec		de
-	dec		hl					; Reset HL for next subtraction. (there may be a more efficient way to subtract 3)
-	dec		hl
-	dec		hl
-	jr			nc,_DispNoUnderflow	; Check for underflow with carry register
-	ld			a,'0'
-	add		a,c
-	bcall(_PutC)
-	ld			c,0
-	push		bc
-	ld			b,4
+ld			a,(de)
+sbc		a,(hl)
+ld			(de),a
+inc		hl
+inc		de
+djnz		_DispSubLoop
+pop		bc
+ld			a,(de)
+sbc		a,(hl)				; Last subtraction goes outside of loop to check underflow
+ld			(de),a
+dec		de					; Reset DE for next subtraction.
+dec		de
+dec		de
+dec		hl					; Reset HL for next subtraction. (there may be a more efficient way to subtract 3)
+dec		hl
+dec		hl
+jr			nc,_DispNoUnderflow	; Check for underflow with carry register
+ld			a,'0'
+add		a,c
+bcall(_PutC)
+ld			c,0
+push		bc
+ld			b,4
 _DispAddLoop:
-	ld			a,(de)
-	adc		a,(hl)
-	ld			(de),a
-	inc		de
-	inc		hl
-	djnz	_DispAddLoop
-	dec		de
-	dec		de
-	dec		de
-	dec		de
-	pop		bc
-	dec		b
-	jr			z,_DispEnd
-	jr			_DispSkipUnderflow
+ld			a,(de)
+adc		a,(hl)
+ld			(de),a
+inc		de
+inc		hl
+djnz	_DispAddLoop
+dec		de
+dec		de
+dec		de
+dec		de
+pop		bc
+dec		b
+jr			z,_DispEnd
+jr			_DispSkipUnderflow
 _DispNoUnderflow:
-	inc		c
+inc		c
 _DispSkipUnderflow:
-	jr			_DispLoop
+jr			_DispLoop
 _DispEnd:
-	bcall(_NewLine)
-	ret
+bcall(_NewLine)
+ret
 
 
 ; .module LoadIntVar 
 ; Location of Int Var stored in de
 LoadIntVar:
-	ld			de,(TempPtr)
-	ld			b,4
+ld			hl,(TempPtr)
+ld			b,4
 _LoadIntVar:
-	ld			a,(de)
-	ld			(hl),a
-	inc		hl
-	inc		de
-	djnz		_LoadIntVar
-	dec		hl
-	dec		hl
-	dec		hl
-	dec		hl
-	pop		bc
-	push		hl
-	push		bc
-	ld			de,(TempPtr)
-	ld			h,0
-	ld			l,4
-	add		hl,de
-	ld			(TempPtr),hl
-	ret
+ld			a,(de)
+ld			(hl),a
+inc		hl
+inc		de
+djnz		_LoadIntVar
+dec		hl
+dec		hl
+dec		hl
+dec		hl
+pop		bc
+push		hl
+push		bc
+ld			de,(TempPtr)
+ld			h,0
+ld			l,4
+add		hl,de
+ld			(TempPtr),hl
+ret
 
 Billion:
 .db $00, $CA, $9A, $3B
