@@ -1,3 +1,188 @@
+;.module Negate
+; Negates the 4 byte integer at the top of the stack
+Negate:
+pop bc
+pop hl
+push hl
+push bc
+ld a,(hl)
+ld b,4
+scf
+ccf
+_NegateCPLLoop:
+ld a,0
+sbc a,(hl)
+ld (hl),a
+inc hl
+djnz _NegateCPLLoop
+ret
+
+; .module Compare
+; Compares two numbers at the top of the stack
+; Does a greater than if carry is set, otherwise a less than
+Compare:
+pop bc
+pop hl
+pop de
+push bc
+jr c, _CompareGreater
+ex de,hl
+_CompareGreater:
+ld b,4
+_CompareLoop:
+ld a,(de)
+cp (hl)
+jr c,_CompareTrue
+jr nz,_CompareFalse
+djnz _CompareLoop
+_CompareFalse:
+ld b,0
+jr _EqualsPushResult
+_CompareTrue:
+ld b,1
+jr _EqualsPushResult
+
+; .module CompareEqual (<= and >=)
+; Compares two numbers at the top of the stack
+; Does a greater than if carry is set, otherwise a less than
+CompareEqual:
+pop bc
+pop hl
+pop de
+push bc
+jr c, _CompareEqualGreater
+ex de,hl
+_CompareEqualGreater:
+ld b,4
+_CompareEqualLoop:
+ld a,(de)
+cp (hl)
+jr c,_CompareEqualTrue
+jr nz,_CompareEqualFalse
+djnz _CompareEqualLoop
+_CompareEqualTrue:
+ld b,1
+jr _EqualsPushResult
+_CompareEqualFalse:
+ld b,0
+jr _EqualsPushResult
+
+;.module Equals
+; Compares two numbers at the top of the stack for equality, leaving the stack with a 1 if equal
+Equals:
+pop bc
+pop hl
+pop de
+push bc
+ld b,3
+_EqualsLoop:
+ld a,(de)
+cp (hl)
+jr nz,_EqualsNotEqual
+inc hl
+inc de
+djnz _EqualsLoop
+ld b,1
+jr _EqualsPushResult
+_EqualsNotEqual:
+ld b,0
+_EqualsPushResult:
+ld hl,(TempPtr)
+ld (hl),b
+ld b,3
+_EqualsPushZeroes:
+inc hl
+ld (hl),0
+djnz _EqualsPushZeroes
+inc hl
+ld (TempPtr),hl
+dec hl
+dec hl
+dec hl
+dec hl
+pop de
+ex de,hl
+push de
+jp (hl)
+
+; .module Mult
+; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
+Mult:
+pop bc
+pop hl
+pop de
+push bc
+
+ld b,32
+_MultLoop:
+push bc
+ld b,3
+ex de,hl
+inc hl
+inc hl
+inc hl
+srl (hl)
+_MultShiftDELoop:
+dec hl
+rr (hl)
+djnz _MultShiftDELoop
+ex de,hl
+jr nc,_MultSkipAdd
+push de
+ld de,_MultResult
+ld b,4
+ccf ; Resets carry because carry should always be true here
+_MultAddLoop:
+ld a,(de)
+adc a,(hl)
+ld (de),a
+inc hl
+inc de
+djnz _MultAddLoop
+dec hl
+dec hl
+dec hl
+dec hl
+pop de
+_MultSkipAdd:
+ld b,3
+sla (hl)
+_MultShiftHLLoop:
+inc hl
+rl (hl)
+djnz _MultShiftHLLoop
+dec hl
+dec hl
+dec hl
+pop bc
+djnz _MultLoop
+; Store the value in _MultResult in temp and push to stack 
+ld hl,_MultResult
+ld de,(TempPtr)
+ld b,4
+_MultPushLoop:
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+djnz _MultPushLoop
+dec de
+dec de
+dec de
+dec de
+pop hl
+push de
+push hl
+ld de,(TempPtr)
+ld h,0
+ld l,4
+add hl,de
+ld (TempPtr),hl
+ret
+_MultResult:
+.db $00, $00, $00, $00
+
+
 ;.module Add			; ORG IDE does not recognize .module directive :(
 ; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
@@ -23,7 +208,7 @@ pop		hl
 push		de
 jp			(hl)
 
-; .module		 Display
+; .module Disp
 ; Displays the number at the top of the hardware stack.
 ; Destroys pretty much every register and flag
 ; Destroys the inputted number
@@ -88,7 +273,6 @@ jr			_DispLoop
 _DispEnd:
 bcall(_NewLine)
 ret
-
 
 ; .module LoadIntVar 
 ; Location of Int Var stored in de

@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.InterruptedException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -30,14 +31,23 @@ public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
-		src = new Scanner(new File("res/Theta1.txt"));
-		//src = new Scanner("30->B:Disp(B+3)");
+		//src = new Scanner(new File("res/Theta1.txt"));
+		src = new Scanner("1->A:If A:5->A:Disp(2*A):End:Disp(A)");
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		//System.out.println(tokens);
 		TreeNode ast = Parser.parse(tokens);
 		//System.out.println("\nPrinting AST:");
-		//ast.print();
+		ast.print();
+		if (args.length > 0) {
+			try {
+				Thread.sleep(Integer.parseInt(args[0]) * 1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (NumberFormatException e) {
+				// Do nothing
+			}
+		}
 		//System.out.println();
 		List<String> code = Generator.generateCode(ast);
 		try {

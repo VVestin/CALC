@@ -1,0 +1,6 @@
+4->A
+If(A>=4)
+5->A
+Disp(2*A)
+End
+Disp(A-1)

@@ -11,8 +11,7 @@ import in.vvest.lexer.TokenClass;
 import in.vvest.parser.TreeNode;
 
 public class Generator {
-	private static final String[] HEXITS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E",
-			"F" };
+	private static final String[] HEXITS = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" };
 	private static int labelIdentifier = 0;
 	
 	public static List<String> generateCode(TreeNode prgm) {
@@ -54,15 +53,6 @@ public class Generator {
 				code.add("call Disp");
 				code.add("");
 			}
-		} else if (t.getToken().getType() == TokenClass.OPERATOR) {
-			if (t.getChildren().size() != 2)
-				System.err.println("Generation Error. Operator has too many operands somehow.");
-			for (TreeNode child : t.getChildren()) {
-				gen(child, code);
-			}
-			if (t.getToken().getValue().equals("+")) {
-				code.add("call Add");
-			}
 		} else if (t.getToken().equals(TI84Token.STO.getToken())) {
 			if (t.getChildren().size() != 2)
 				System.err.println("Generation Error. Operator has too many operands somehow.");
@@ -73,9 +63,63 @@ public class Generator {
 		} else if (t.getToken().getType() == TokenClass.INT_VAR) {
 			code.add("ld de,IntVar + " + 4 * (t.getToken().getValue().charAt(0) - 'A'));
 			code.add("call LoadIntVar");
+		} else if (t.getToken().getType() == TokenClass.OPERATOR) {
+			genOperator(t, code);
+		} else if (t.getToken().getType() == TokenClass.KEYWORD) {
+			genKeyWord(t, code);
 		}
 	}
-	
+
+	private static void genKeyWord(TreeNode t, List<String> code) {
+		if (t.getToken().equals(TI84Token.IF.getToken())) {
+			gen(t.getChildren().get(0), code);
+			int ifLabel = ++labelIdentifier;
+			code.add("pop hl");
+			code.add("ld b,4");
+			code.add("IfCheckLoop" + ifLabel + ":");
+			code.add("ld a,(hl)");
+			code.add("or a");
+			code.add("jr nz,IfTrue" + ifLabel);
+			code.add("djnz IfCheckLoop" + ifLabel);
+			code.add("jp IfFalse" + ifLabel);
+			code.add("IfTrue" + ifLabel + ":");
+			for (int i = 1; i < t.getChildren().size(); i++) {
+				gen(t.getChildren().get(i), code);
+			}
+			code.add("IfFalse" + ifLabel + ":");
+		}
+	}
+
+	private static void genOperator(TreeNode t, List<String> code) {
+		for (TreeNode child : t.getChildren()) {
+			gen(child, code);
+		}
+		if (t.getToken().getValue().equals("+")) {
+			code.add("call Add");
+		} else if (t.getToken().getValue().equals("-")) {
+			code.add("call Negate");
+			code.add("call Add");
+		} else if (t.getToken().getValue().equals("*")) {
+			code.add("call Mult");
+		} else if (t.getToken().getValue().equals("=")) {
+			code.add("call Equals");
+		} else if (t.getToken().getValue().equals(">=")) {
+			code.add("scf");
+			code.add("ccf");
+			code.add("call CompareEqual");
+		} else if (t.getToken().getValue().equals("<=")) {
+			code.add("scf");
+			code.add("call CompareEqual");
+		} else if (t.getToken().getValue().equals(">")) {
+			code.add("scf");
+			code.add("ccf");
+			code.add("call Compare");
+		} else if (t.getToken().getValue().equals("<")) {
+			code.add("scf");
+			code.add("call Compare");
+		} 
+	}
+
 	private static void moveHLtoDE(int bytes, List<String> code) {
 		code.add("ld b," + bytes);
 		code.add("_MoveBytesLoop" + ++labelIdentifier + ":");

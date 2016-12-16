@@ -18,7 +18,9 @@
 				<attribute name="Main-Class" value="in.vvest.main.Main" />
 			</manifest>
 		</jar>
-		<java jar="${exec.dir}/compile.jar" fork="true" />
+		<java jar="${exec.dir}/compile.jar" fork="true">
+			<arg value="${arg0}" />
+		</java>
 	</target>
 		
 	<target name="clean">
