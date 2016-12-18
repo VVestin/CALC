@@ -20,20 +20,20 @@ public class Lexer {
 
 	private String src;
 
-	public Lexer(String s) {
-		this(new Scanner(s));
-	}
-
-	public Lexer(File f) throws FileNotFoundException {
-		this(new Scanner(f));
-	}
-
 	public Lexer(Scanner s) {
 		src = "";
 		while (s.hasNextLine()) {
 			src += ":" + s.nextLine();
 		}
 		s.close();
+	}
+	
+	public Lexer(String src) {
+		this(new Scanner(src));
+	}
+	
+	public Lexer(File f) throws FileNotFoundException {
+		this(new Scanner(f));
 	}
 
 	public List<Token> tokenize() {

@@ -31,13 +31,11 @@ public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Scanner src; 
-		//src = new Scanner(new File("res/Theta1.txt"));
-		src = new Scanner("1->A:If A:5->A:Disp(2*A):End:Disp(A)");
+		src = new Scanner(new File("res/Theta0.txt"));
 		Lexer lex = new Lexer(src);
 		List<Token> tokens = lex.tokenize();
 		//System.out.println(tokens);
 		TreeNode ast = Parser.parse(tokens);
-		//System.out.println("\nPrinting AST:");
 		ast.print();
 		if (args.length > 0) {
 			try {
@@ -48,7 +46,6 @@ public class Main {
 				// Do nothing
 			}
 		}
-		//System.out.println();
 		List<String> code = Generator.generateCode(ast);
 		try {
 			compileWeb(code);

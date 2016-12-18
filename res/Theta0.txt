@@ -1,6 +1,9 @@
-4->A
-If(A>=4)
+? This is a comment
 5->A
-Disp(2*A)
+If(A)
+Disp(A*2)
 End
-Disp(A-1)
+For(B,0,A)
+Disp(min(A,A-B+2))
+End
+Disp("Done")

@@ -7,12 +7,23 @@
 
 	<target name="build">
 		<mkdir dir="${bin.dir}" />
-		<javac destdir="${bin.dir}">
+		<javac destdir="${bin.dir}" includeantruntime="false">
 			<src path="${src.dir}" />
 		</javac>
 	</target>
 
 	<target name="run" depends="build">	
+		<jar destfile="${exec.dir}/compile.jar" basedir="${bin.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="in.vvest.compiler.Compiler" />
+			</manifest>
+		</jar>
+		<java jar="${exec.dir}/compile.jar" fork="true">
+			<arg value="${arg0}" />
+		</java>
+	</target>
+
+	<target name="runold" depends="build">	
 		<jar destfile="${exec.dir}/compile.jar" basedir="${bin.dir}">
 			<manifest>
 				<attribute name="Main-Class" value="in.vvest.main.Main" />
@@ -22,7 +33,7 @@
 			<arg value="${arg0}" />
 		</java>
 	</target>
-		
+
 	<target name="clean">
 		<delete>
 			<fileset dir="${bin.dir}">
