@@ -21,9 +21,6 @@ public class Parser {
 		boolean endLine = false;
 		while (it.hasNext()) {
 			Token next = it.next();
-			System.out.println("rpn " + rpn);
-			System.out.println("operatorStack " + operatorStack + "\n");
-			System.out.println("Looking at " + next);
 			if (next instanceof Colon) {
 				newLine = true;
 				endLine = false;

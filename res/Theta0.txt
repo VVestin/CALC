@@ -1,9 +1,6 @@
 ? This is a comment
-5->A
-If(A)
-Disp(A*2)
-End
-For(B,0,A)
-Disp(min(A,A-B+2))
-End
-Disp("Done")
+Disp(5)
+Disp(5)
+Disp(5)
+Disp(5)
+Pause

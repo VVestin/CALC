@@ -1,109 +1,109 @@
 #include "ti83plus.inc"
 #define progStart $9D95
-#define TEMP_SIZE $100
+#define divScratch $8000
 .org progStart-2
 .db $BB,$6D
 	bcall(_ClrLCDFull)
 	bcall(_HomeUp)
-	ld hl,(TempPtr)
-	ld (hl),$01
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	dec hl
-	dec hl
-	dec hl
+	ld a,$05
+	ld de,$0000
+	call PushIntLiteral
+	call Disp
+	ld a,$05
+	ld de,$0000
+	call PushIntLiteral
+	call Disp
+	ld a,$05
+	ld de,$0000
+	call PushIntLiteral
+	call Disp
+	ld a,$05
+	ld de,$0000
+	call PushIntLiteral
+	call Disp
+	bcall(_GetKey)
+	ret
+	
+IntArg0:
+.db $00, $00, $00
+IntArg1:
+.db $00, $00, $00
+	
+	;.module FreeIntArg0
+	; Puts the integer at one below the top of the stack into IntArg0 and then frees it
+FreeIntArg0:
+	pop bc
+	pop de
+	pop hl ; hl is the int to free
+	push de
+	push bc
 	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,4
-	add hl,de
-	ld (TempPtr),hl
-	ld hl,(TempPtr)
-	ld (hl),$02
+	ld de,IntArg0
+	ld b,3
+_FreeIntArg0Loop:
+	ld a,(hl)
+	ld (de),a
 	inc hl
-	ld (hl),$00
+	inc de
+	djnz _FreeIntArg0Loop
+	call FreeInt
+	ret
+	
+	;.module If
+	; Checks the value on top of the stack, if it is false jumps to hl
+If:
+	pop bc
+	pop de
+	push bc
+	ld b,3
+_IfCheckLoop:
+	ld a,(de)
+	or a
+	ret nz
+	djnz _IfCheckLoop
+	pop bc
+	jp (hl) 
+	
+	
+	;.module PushIntLiteral
+	; Pushes the number in a (lsb) and de (msb) 
+PushIntLiteral:
+	push de
+	push af
+	call AllocInt
+	pop hl
+	pop af
+	pop de
+	ld (hl),a
 	inc hl
-	ld (hl),$00
+	ld (hl),d
 	inc hl
-	ld (hl),$00
-	dec hl
-	dec hl
-	dec hl
+	ld (hl),e
+	pop de
 	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,4
-	add hl,de
-	ld (TempPtr),hl
-	ld hl,(TempPtr)
-	ld (hl),$04
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	dec hl
-	dec hl
-	dec hl
-	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,4
-	add hl,de
-	ld (TempPtr),hl
-	ld hl,(TempPtr)
-	ld (hl),$1E
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	dec hl
-	dec hl
-	dec hl
-	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,4
-	add hl,de
-	ld (TempPtr),hl
-	ld hl,(TempPtr)
-	ld (hl),$03
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	inc hl
-	ld (hl),$00
-	dec hl
-	dec hl
-	dec hl
-	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,4
-	add hl,de
-	ld (TempPtr),hl
-	call Mult
-	call Negate
-	call Add
+	ex de,hl
+	jp (hl)
+	
+	;.module StoIntVar
+	; Takes 3 bytes from the number at the top of the stack and moves them to de
+StoIntVar:
+	pop bc
+	pop hl
+	push bc
+	ld b,0
+	ld c,3
+	ldir
 	ret
 	
 	;.module Negate
-	; Negates the 4 byte integer at the top of the stack
+	; Negates the 3 byte integer at the top of the stack
 Negate:
 	pop bc
 	pop hl
 	push hl
 	push bc
 	ld a,(hl)
-	ld b,4
+	ld b,3
 	scf
 	ccf
 _NegateCPLLoop:
@@ -114,7 +114,22 @@ _NegateCPLLoop:
 	djnz _NegateCPLLoop
 	ret
 	
-	; .module Compare
+	;.module AbsValue
+	; If the number at the top of the stack is negative it is negated.
+AbsValue:
+	pop hl
+	pop de
+	push de
+	inc de
+	inc de
+	ld a,(de)
+	bit 7,a
+	jr z,_AbsValueSkipNegate
+	call Negate
+_AbsValueSkipNegate:
+	jp (hl)
+	
+	;.module Compare
 	; Compares two numbers at the top of the stack
 	; Does a greater than if carry is set, otherwise a less than
 Compare:
@@ -125,7 +140,7 @@ Compare:
 	jr c, _CompareGreater
 	ex de,hl
 _CompareGreater:
-	ld b,4
+	ld b,3
 _CompareLoop:
 	ld a,(de)
 	cp (hl)
@@ -134,10 +149,10 @@ _CompareLoop:
 	djnz _CompareLoop
 _CompareFalse:
 	ld b,0
-	jr _EqualsPushResult
+	jp _EqualsPushResult
 _CompareTrue:
 	ld b,1
-	jr _EqualsPushResult
+	jp _EqualsPushResult
 	
 	; .module CompareEqual (<= and >=)
 	; Compares two numbers at the top of the stack
@@ -150,7 +165,7 @@ CompareEqual:
 	jr c, _CompareEqualGreater
 	ex de,hl
 _CompareEqualGreater:
-	ld b,4
+	ld b,3
 _CompareEqualLoop:
 	ld a,(de)
 	cp (hl)
@@ -159,8 +174,81 @@ _CompareEqualLoop:
 	djnz _CompareEqualLoop
 _CompareEqualTrue:
 	ld b,1
-	jr _EqualsPushResult
+	jp _EqualsPushResult
 _CompareEqualFalse:
+	ld b,0
+	jp _EqualsPushResult
+	
+	;.module Or
+	; Looks at two numbes on top of the stack. Pushes on a 1 if either is nonzero, otherwise a 0.
+Or:
+	pop bc
+	pop hl
+	pop de
+	push bc
+	ld b,3
+_OrLoop:
+	ld a,(de)
+	or a
+	jr nz, _OrTrue
+	ld a,(hl)
+	or a
+	jr nz, _OrTrue
+	inc hl
+	inc de
+	djnz _OrLoop
+	ld b,0
+	jr _EqualsPushResult
+_OrTrue:
+	ld b,1
+	jr _EqualsPushResult
+	
+	;.module And
+	; Looks at two numbers on top of the stack. Pushes on a 1 if both are nonzero, otherwise a 0.
+And:
+	pop bc
+	pop hl
+	pop de
+	push bc
+	ld b,3
+_AndLoop1:
+	ld a,(de)
+	or a
+	jr nz,_AndPartTrue
+	inc de
+	djnz _AndLoop1
+	ld b,0
+	jr _EqualsPushResult
+_AndPartTrue:
+	ld b,3
+_AndLoop2:
+	ld a,(hl)
+	or a
+	jr nz,_AndTrue
+	inc hl
+	djnz _AndLoop2
+	ld b,0
+	jr _EqualsPushResult
+_AndTrue:
+	ld b,1
+	jr _EqualsPushResult
+	
+	;.module Not
+	; Looks at number at the top of the stack. pushes a 0 if nonzero and 1 if 0
+Not:
+	pop bc
+	pop hl
+	push bc
+	ld b,3
+_NotLoop:
+	ld a,(hl)
+	or a
+	jr nz,_NotTrue
+	inc hl
+	djnz _NotLoop
+	ld b,1
+	jr _EqualsPushResult
+_NotTrue:
 	ld b,0
 	jr _EqualsPushResult
 	
@@ -186,7 +274,7 @@ _EqualsNotEqual:
 _EqualsPushResult:
 	ld hl,(TempPtr)
 	ld (hl),b
-	ld b,3
+	ld b,2
 _EqualsPushZeroes:
 	inc hl
 	ld (hl),0
@@ -196,26 +284,29 @@ _EqualsPushZeroes:
 	dec hl
 	dec hl
 	dec hl
-	dec hl
 	pop de
 	ex de,hl
 	push de
 	jp (hl)
 	
-	; .module Mult
+	;.module Mult
 	; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
 Mult:
+	ld b,3
+	ld hl,_MultResult
+_MultClearResultLoop:
+	ld (hl),0
+	inc hl
+	djnz _MultClearResultLoop
 	pop bc
 	pop hl
 	pop de
 	push bc
-	
-	ld b,32
+	ld b,24
 _MultLoop:
 	push bc
-	ld b,3
+	ld b,2
 	ex de,hl
-	inc hl
 	inc hl
 	inc hl
 	srl (hl)
@@ -227,7 +318,7 @@ _MultShiftDELoop:
 	jr nc,_MultSkipAdd
 	push de
 	ld de,_MultResult
-	ld b,4
+	ld b,3
 	ccf ; Resets carry because carry should always be true here
 _MultAddLoop:
 	ld a,(de)
@@ -239,10 +330,9 @@ _MultAddLoop:
 	dec hl
 	dec hl
 	dec hl
-	dec hl
 	pop de
 _MultSkipAdd:
-	ld b,3
+	ld b,2
 	sla (hl)
 _MultShiftHLLoop:
 	inc hl
@@ -250,13 +340,12 @@ _MultShiftHLLoop:
 	djnz _MultShiftHLLoop
 	dec hl
 	dec hl
-	dec hl
 	pop bc
 	djnz _MultLoop
 	; Store the value in _MultResult in temp and push to stack 
 	ld hl,_MultResult
 	ld de,(TempPtr)
-	ld b,4
+	ld b,3
 _MultPushLoop:
 	ld a,(hl)
 	ld (de),a
@@ -266,44 +355,41 @@ _MultPushLoop:
 	dec de
 	dec de
 	dec de
-	dec de
 	pop hl
 	push de
 	push hl
 	ld de,(TempPtr)
 	ld h,0
-	ld l,4
+	ld l,3
 	add hl,de
 	ld (TempPtr),hl
 	ret
 _MultResult:
-.db $00, $00, $00, $00
-	
+.db $00, $00, $00, $00, $00, $00
 	
 	;.module Add			; ORG IDE does not recognize .module directive :(
 	; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
-	pop		bc
-	pop		hl
-	pop		de
-	push		bc
-	ld			b,4
+	pop bc
+	pop hl
+	pop de
+	push bc
+	ld	b,3
 	scf
 	ccf
 _AddLoop:
-	ld			a,(de)
-	adc		a,(hl)
-	ld			(de),a
-	inc		hl
-	inc		de
+	ld	a,(de)
+	adc a,(hl)
+	ld	(de),a
+	inc hl
+	inc de
 	djnz _AddLoop
-	dec		de
-	dec		de
-	dec		de
-	dec		de
-	pop		hl
-	push		de
-	jp			(hl)
+	dec de
+	dec de
+	dec de
+	pop hl
+	push de
+	jp	(hl)
 	
 	; .module Disp
 	; Displays the number at the top of the hardware stack.
@@ -313,114 +399,159 @@ _AddLoop:
 	; TODO right justify
 	; TODO move number logic to a num2str function and make Disp function display strings
 Disp:
-	ld			hl,Billion			; HL is the base 10 number to subtract
-	pop		bc
-	pop		de					; DE is the number to display
-	push		bc
-	ld			b,10				; Number of digits needed to check at max
-	ld			c,0					; C counts how many subtractions occur before an overflow
+	call FreeIntArg0
+	ld de,IntArg0
+	ld	hl,Ten_Million			; HL is the base 10 number to subtract
+	ld	b,8				; Number of digits needed to check at max
+	ld	c,0					; C counts how many subtractions occur before an overflow
 _DispLoop:
-	push		bc
-	ld			b,3
+	push bc
+	ld	b,2
 	scf
 	ccf
 _DispSubLoop:
-	ld			a,(de)
-	sbc		a,(hl)
-	ld			(de),a
-	inc		hl
-	inc		de
-	djnz		_DispSubLoop
-	pop		bc
-	ld			a,(de)
-	sbc		a,(hl)				; Last subtraction goes outside of loop to check underflow
-	ld			(de),a
-	dec		de					; Reset DE for next subtraction.
-	dec		de
-	dec		de
-	dec		hl					; Reset HL for next subtraction. (there may be a more efficient way to subtract 3)
-	dec		hl
-	dec		hl
-	jr			nc,_DispNoUnderflow	; Check for underflow with carry register
-	ld			a,'0'
-	add		a,c
+	ld	a,(de)
+	sbc a,(hl)
+	ld	(de),a
+	inc hl
+	inc de
+	djnz _DispSubLoop
+	pop bc
+	ld	a,(de)
+	sbc a,(hl)				; Last subtraction goes outside of loop to check underflow
+	ld	(de),a
+	dec de					; Reset DE for next subtraction.
+	dec de
+	dec hl					; Reset HL for next subtraction. (there may be a more efficient way to subtract 3)
+	dec hl
+	jr	nc,_DispNoUnderflow	; Check for underflow with carry register
+	ld	a,'0'
+	add a,c
 	bcall(_PutC)
-	ld			c,0
-	push		bc
-	ld			b,4
+	ld	c,0
+	push bc
+	ld	b,3
 _DispAddLoop:
-	ld			a,(de)
-	adc		a,(hl)
-	ld			(de),a
-	inc		de
-	inc		hl
+	ld	a,(de)
+	adc a,(hl)
+	ld	(de),a
+	inc de
+	inc hl
 	djnz	_DispAddLoop
-	dec		de
-	dec		de
-	dec		de
-	dec		de
-	pop		bc
-	dec		b
-	jr			z,_DispEnd
-	jr			_DispSkipUnderflow
+	dec de
+	dec de
+	dec de
+	pop bc
+	dec b
+	jr	z,_DispEnd
+	jr	_DispSkipUnderflow
 _DispNoUnderflow:
-	inc		c
+	inc c
 _DispSkipUnderflow:
-	jr			_DispLoop
+	jr	_DispLoop
 _DispEnd:
 	bcall(_NewLine)
 	ret
 	
-	; .module LoadIntVar 
+	;.module LoadIntVar 
 	; Location of Int Var stored in de
 LoadIntVar:
-	ld			hl,(TempPtr)
-	ld			b,4
+	ld	hl,(TempPtr)
+	ld	b,3
 _LoadIntVar:
-	ld			a,(de)
-	ld			(hl),a
-	inc		hl
-	inc		de
+	ld	a,(de)
+	ld	(hl),a
+	inc hl
+	inc de
 	djnz		_LoadIntVar
-	dec		hl
-	dec		hl
-	dec		hl
-	dec		hl
-	pop		bc
-	push		hl
-	push		bc
-	ld			de,(TempPtr)
-	ld			h,0
-	ld			l,4
-	add		hl,de
-	ld			(TempPtr),hl
+	dec hl
+	dec hl
+	dec hl
+	pop bc
+	push hl
+	push bc
+	ld	de,(TempPtr)
+	ld	h,0
+	ld	l,3
+	add hl,de
+	ld	(TempPtr),hl
 	ret
+	
+	;.module AllocInt
+	; Allocates 3 bytes of memory and pushes the address on to the stack 
+AllocInt:
+	pop de
+	ld hl,(FreePtr)
+	ld a,(hl)
+	inc hl
+	or (hl)
+	inc hl
+	push hl ; Push the location of free memory
+	jr z,_AllocIntSplit
+	dec hl
+	ld c,(hl)
+	dec hl
+	ld b,(hl)
+	ld (FreePtr),bc
+	ex de,hl
+	jp (hl) ; return
+_AllocIntSplit:
+	inc hl ; Make hl point to next available bytes in the big free space
+	inc hl
+	inc hl
+	ld (FreePtr),hl
+	ex de,hl
+	jp (hl)
+	
+	;.module FreeInt
+	; Frees 3 bytes of memory at the top of the stack and puts them back into the free list on the heap
+FreeInt:
+	pop bc
+	pop de
+	dec de
+	ld hl,FreePtr+1
+	ld a,(hl)
+	ld (de),a
+	dec de
+	dec hl
+	ld a,(hl)
+	ld (de),a
+	ld (hl),d
+	inc hl
+	ld (hl),e
+	ld h,b
+	ld l,c
+	jp (hl)
 	
 Billion:
 .db $00, $CA, $9A, $3B
 Hundred_Million:
 .db $00, $E1, $F5, $05
 Ten_Million:
-.db $80, $96, $98, $00
+.db $80, $96, $98
 Million:
-.db $40, $42, $0F, $00
+.db $40, $42, $0F
 Hundred_Thousand:
-.db $A0, $86, $01, $00
+.db $A0, $86, $01
 Ten_Thousand:
-.db $10, $27, $00, $00
+.db $10, $27, $00
 Thousand:
-.db $E8, $03, $00, $00
+.db $E8, $03, $00
 Hundred:
-.db $64, $00, $00, $00
+.db $64, $00, $00
 Ten:
-.db $0A, $00, $00, $00
+.db $0A, $00, $00
 One:
-.db $01, $00, $00, $00
+.db $01, $00, $00
 	
+	; Table of IntVars (A-Z)
 IntVar:
-.ds $68, $0
+.ds $4E, $0
+	
 TempPtr:
-.dw Temp
-.db $00
-Temp:
-.ds TEMP_SIZE, $0
+	; Just make the compiler happy, take out later
+FreePtr:
+.dw Heap
+	
+Heap:
+.dw $00

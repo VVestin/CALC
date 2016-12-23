@@ -39,13 +39,21 @@ public class Operator extends Token {
 	}
 
 	public static class Store extends Operator {
+		private static int labelIdentifier;
+
 		public Store() {
 			super(0);
 		}
 
 		public void compile(List<String> code) {
 			children.get(0).compile(code);
-			throw new RuntimeException("Store Unimplimented");
+			if (!(children.get(1) instanceof Identifier))
+				System.err.println("Error Invalid right sign of assignment");
+			Identifier var = (Identifier) children.get(1);
+			if (var.getType() == Type.INTEGER) {
+				code.add("ld de,IntVar+" + 3 * (var.getIdentifier().charAt(0) - 'A'));
+				code.add("call StoIntVar");
+			}
 		}
 
 		public Token copy() {
@@ -105,7 +113,7 @@ public class Operator extends Token {
 		
 		public void compile(List<String> code) {
 			super.compile(code);
-			code.add("call Multiply");
+			code.add("call Mult");
 		}
 		
 		public Token copy() {
@@ -138,7 +146,9 @@ public class Operator extends Token {
 		
 		public void compile(List<String> code) {
 			super.compile(code);
-			if (not) throw new RuntimeException("Not equals has not been implimented yet");
+			code.add("call Equals");
+			if (not)
+				code.add("call Not");
 		}
 
 		public String getValue() {
@@ -160,6 +170,7 @@ public class Operator extends Token {
 		}
 		
 		public void compile(List<String> code) {
+			super.compile(code);
 			code.add("scf");
 			if (!less) {
 				code.add("ccf");

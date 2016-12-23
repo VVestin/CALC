@@ -13,7 +13,8 @@ public class Identifier extends Token {
 	}
 	
 	public void compile(List<String> code) {
-		throw new RuntimeException("Unimplimented");
+		code.add("ld de,IntVar + " + 3 * (id.charAt(0) - 'A'));
+		code.add("call LoadIntVar");
 	}
 
 	public boolean isCompileable() {
@@ -22,5 +23,13 @@ public class Identifier extends Token {
 
 	public String getValue() {
 		return id;
+	}
+
+	public String getIdentifier() {
+		return id;
+	}
+
+	public Type getType() {
+		return type;
 	}
 }
