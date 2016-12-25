@@ -1,8 +1,3 @@
-IntArg0:
-.db $00, $00, $00
-IntArg1:
-.db $00, $00, $00
-
 ;.module FreeIntArg0
 ; Puts the integer at one below the top of the stack into IntArg0 and then frees it
 FreeIntArg0:
@@ -20,6 +15,26 @@ ld (de),a
 inc hl
 inc de
 djnz _FreeIntArg0Loop
+call FreeInt
+ret
+
+;.module FreeIntArg1
+; Puts the integer at one below the top of the stack into IntArg1 and then frees it
+FreeIntArg1:
+pop bc
+pop de
+pop hl ; hl is the int to free
+push de
+push bc
+push hl
+ld de,IntArg1
+ld b,3
+_FreeIntArg1Loop:
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+djnz _FreeIntArg1Loop
 call FreeInt
 ret
 
@@ -54,6 +69,8 @@ ld (hl),d
 inc hl
 ld (hl),e
 pop de
+dec hl
+dec hl
 push hl
 ex de,hl
 jp (hl)
@@ -72,10 +89,8 @@ ret
 ;.module Negate
 ; Negates the 3 byte integer at the top of the stack
 Negate:
-pop bc
 pop hl
 push hl
-push bc
 ld a,(hl)
 ld b,3
 scf
@@ -344,10 +359,10 @@ _MultResult:
 ;.module Add			; ORG IDE does not recognize .module directive :(
 ; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
-pop bc
-pop hl
-pop de
-push bc
+call FreeIntArg0
+call FreeIntArg1
+ld de,IntArg0
+ld hl,IntArg1
 ld	b,3
 scf
 ccf
@@ -358,12 +373,22 @@ ld	(de),a
 inc hl
 inc de
 djnz _AddLoop
-dec de
-dec de
-dec de
+call AllocInt
+ld hl,IntArg0
+pop de
+ld b,3
+_AddStoreResultLoop:
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+djnz _AddStoreResultLoop ; TODO use ldir instead of manually looping
 pop hl
+dec de
+dec de
+dec de
 push de
-jp	(hl)
+jp (hl)
 
 ; .module Disp
 ; Displays the number at the top of the hardware stack.
@@ -451,51 +476,100 @@ add hl,de
 ld	(TempPtr),hl
 ret
 
-;.module AllocInt
-; Allocates 3 bytes of memory and pushes the address on to the stack 
-AllocInt:
-pop de
-ld hl,(FreePtr)
+AllocPrev:
+.dw $0000
+;.module Alloc
+; allocates c bytes on the heap and returns a pointer to those bytes.
+; Does not coalesce. Max size is 256 (1 byte).
+; Because no coalesce, will not split chunks. 
+; Possible to  ask for 3 bytes and get a 256 byte chunk.
+; struct Block {
+; 		Next*		2 byte
+; 		Size		1 byte
+;		Payload	x byte
+; }
+; 1. Find a block
+; 2. Change the previous block to point where its next block points
+; 3. Set the size of the data in the structure
+; 4. Push a pointer to the block and return
+Alloc:
+ld b,0
+ld hl,Heap
+_AllocFindMemLoop:
 ld a,(hl)
 inc hl
-or (hl)
+or (hl) ; check if hl is 00.
+jr _AllocSplitEnd
 inc hl
-push hl ; Push the location of free memory
-jr z,_AllocIntSplit
+ld a,(hl) ; load capacity into a
+cp c
+jr z,_AllocNoSplit
+jr nc,_AllocSplit
 dec hl
-ld c,(hl)
+ld de,AllocPrev+1 ; Save the location of the previous block
+ld a,(hl)
+ld (de),a
 dec hl
-ld b,(hl)
-ld (FreePtr),bc
-ex de,hl
-jp (hl) ; return
-_AllocIntSplit:
-inc hl ; Make hl point to next available bytes in the big free space
+dec de
+ld a,(hl)
+ld (de),a
+ld d,0
+ld e,c
+scf
+ccf
+adc hl,de ; Jump hl to look at next block
+jr _AllocFindMemLoop
+_AllocSplit:
+; TODO write this to actually split once coalescing works. 
+; Tradeoff between internal and external fragmentation
+ld c,a
+_AllocNoSplit:
+; Push and change the previous block to point to this block's next
 inc hl
+push hl
+ld de,(AllocPrev)
+dec hl ; hl points to size
+ld (hl),c
+dec hl
+dec hl ; hl points to next*
+ld a,(hl)
+ld (de),a
 inc hl
-ld (FreePtr),hl
-ex de,hl
-jp (hl)
+inc de
+ld a,(hl)
+ld (de),a
+pop de
+pop hl
+push de
+jp (hl) ; Return
+_AllocSplitEnd:
+inc hl ; hl points to the size
+ld (hl),c
+inc hl ; hl points to the payload
+push hl
+ld d,0
+ld e,(hl)
+add hl,de ; Change hl to point to the new start of blank memory
+ld de,(AllocPrev)
+ld a,l ; Load in little endian order
+ld (de),a
+inc de
+ld a,h
+ld (de),a
+ld (hl),0 ; Set the next pointer of the end bank to 00
+inc hl
+ld (hl),0
+pop de
+pop hl
+push de
+jp (hl) ; Return
 
-;.module FreeInt
-; Frees 3 bytes of memory at the top of the stack and puts them back into the free list on the heap
-FreeInt:
-pop bc
+;.module Free
+; Frees the memory pointed to at the top of the stack
 pop de
-dec de
-ld hl,FreePtr+1
-ld a,(hl)
-ld (de),a
-dec de
-dec hl
-ld a,(hl)
-ld (de),a
-ld (hl),d
-inc hl
-ld (hl),e
-ld h,b
-ld l,c
-jp (hl)
+pop hl
+push de
+dec 
 
 Billion:
 .db $00, $CA, $9A, $3B
@@ -517,6 +591,11 @@ Ten:
 .db $0A, $00, $00
 One:
 .db $01, $00, $00
+
+IntArg0:
+.db $00, $00, $00
+IntArg1:
+.db $00, $00, $00
 
 ; Table of IntVars (A-Z)
 IntVar:

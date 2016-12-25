@@ -30,7 +30,7 @@ public class Literal extends Token {
 				digit++;
 			}
 			code.add("ld a,$" + hex[1] + hex[0]);
-			code.add("ld de,$" + hex[5] + hex[4] + hex[1] + hex[2]);
+			code.add("ld de,$" + hex[5] + hex[4] + hex[3] + hex[2]);
 			code.add("call PushIntLiteral");
 		}
 	}

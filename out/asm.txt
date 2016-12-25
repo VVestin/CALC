@@ -5,21 +5,13 @@
 .db $BB,$6D
 	bcall(_ClrLCDFull)
 	bcall(_HomeUp)
-	ld a,$05
+	ld a,$14
 	ld de,$0000
 	call PushIntLiteral
-	call Disp
-	ld a,$05
+	ld a,$19
 	ld de,$0000
 	call PushIntLiteral
-	call Disp
-	ld a,$05
-	ld de,$0000
-	call PushIntLiteral
-	call Disp
-	ld a,$05
-	ld de,$0000
-	call PushIntLiteral
+	call Add
 	call Disp
 	bcall(_GetKey)
 	ret
@@ -46,6 +38,26 @@ _FreeIntArg0Loop:
 	inc hl
 	inc de
 	djnz _FreeIntArg0Loop
+	call FreeInt
+	ret
+	
+	;.module FreeIntArg1
+	; Puts the integer at one below the top of the stack into IntArg1 and then frees it
+FreeIntArg1:
+	pop bc
+	pop de
+	pop hl ; hl is the int to free
+	push de
+	push bc
+	push hl
+	ld de,IntArg1
+	ld b,3
+_FreeIntArg1Loop:
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	djnz _FreeIntArg1Loop
 	call FreeInt
 	ret
 	
@@ -80,6 +92,8 @@ PushIntLiteral:
 	inc hl
 	ld (hl),e
 	pop de
+	dec hl
+	dec hl
 	push hl
 	ex de,hl
 	jp (hl)
@@ -370,10 +384,10 @@ _MultResult:
 	;.module Add			; ORG IDE does not recognize .module directive :(
 	; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
-	pop bc
-	pop hl
-	pop de
-	push bc
+	call FreeIntArg0
+	call FreeIntArg1
+	ld de,IntArg0
+	ld hl,IntArg1
 	ld	b,3
 	scf
 	ccf
@@ -384,12 +398,22 @@ _AddLoop:
 	inc hl
 	inc de
 	djnz _AddLoop
-	dec de
-	dec de
-	dec de
+	call AllocInt
+	ld hl,IntArg0
+	pop de
+	ld b,3
+_AddStoreResultLoop:
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	djnz _AddStoreResultLoop ; TODO use ldir instead of manually looping
 	pop hl
+	dec de
+	dec de
+	dec de
 	push de
-	jp	(hl)
+	jp (hl)
 	
 	; .module Disp
 	; Displays the number at the top of the hardware stack.
@@ -500,6 +524,9 @@ _AllocIntSplit:
 	inc hl
 	inc hl
 	ld (FreePtr),hl
+	ld (hl),0
+	inc hl
+	ld (hl),0
 	ex de,hl
 	jp (hl)
 	
@@ -516,9 +543,9 @@ FreeInt:
 	dec hl
 	ld a,(hl)
 	ld (de),a
-	ld (hl),d
-	inc hl
 	ld (hl),e
+	inc hl
+	ld (hl),d
 	ld h,b
 	ld l,c
 	jp (hl)
