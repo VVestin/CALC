@@ -1,8 +1,25 @@
-?Hello
-1->A
-6->B
-?This is a Comment
-Disp(A+4):?Inline comment
-A+B->B
-Disp(B)
-?Do not compile this
+? Tests comparison operators 
+? Also tests concatenation
+? And string conversions
+Disp("5=4   "+(5=4))
+Disp("5=/=4 "+(5=/=4))
+Disp("5<=4  "+(5<=4))
+Disp("5>=4  "+(5>=4))
+Disp("5<4   "+(5<4))
+Disp("5>4   "+(5>4))
+Pause
+ClrHome
+Disp("3=4   "+(3=4))
+Disp("3=/=4 "+(3=/=4))
+Disp("3<=4  "+(3<=4))
+Disp("3>=4  "+(3>=4))
+Disp("3<4   "+(3<4))
+Disp("3>4   "+(3>4))
+Pause
+ClrHome
+Disp("4=4   "+(4=4))
+Disp("4=/=4 "+(4=/=4))
+Disp("4<=4  "+(4<=4))
+Disp("4>=4  "+(4>=4))
+Disp("4<4   "+(4<4))
+Disp("4>4   "+(4>4))

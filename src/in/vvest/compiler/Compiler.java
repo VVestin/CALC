@@ -36,6 +36,7 @@ public class Compiler {
 		tokenID.put("-", new Operator.Subtract());
 		tokenID.put("*", new Operator.Multiply());
 		tokenID.put("/", new Operator.Divide());
+		tokenID.put("%", new Operator.Modulo());
 		tokenID.put("<", new Operator.Compare(true, false));
 		tokenID.put(">", new Operator.Compare(false, false));;
 		tokenID.put("<=", new Operator.Compare(true, true));
@@ -46,18 +47,34 @@ public class Compiler {
 		tokenID.put(" or ", new Operator.OR());
 		tokenID.put(" xor ", new Operator.XOR());
 		tokenID.put("->", new Operator.Store());
-		tokenID.put("Disp(", new Function("Disp", 1));
-		tokenID.put("not(", new Function("Not", 1));
+		tokenID.put("Disp(", new Function.Disp());
+		tokenID.put("Output(", new Function.Output());
+		tokenID.put("not(", new Function("Not", 1, Type.INTEGER));
+		tokenID.put("str(", new Function("Num2Str", 1, Type.STRING));
+		tokenID.put("sub(", new Function.SubString());
+		tokenID.put("dim(", new Function("Dimension", 1, Type.INTEGER));
+		tokenID.put("augment(", new Function("Augment", 2, Type.LIST));
+		tokenID.put("pop(", new Function.Pop());
 		tokenID.put("If(", new ControlStructure.If());
+		tokenID.put("Else", new ControlStructure.Else());
+		tokenID.put("ElseIf(", new ControlStructure.ElseIf());
 		tokenID.put("While(", new ControlStructure.While());
 		tokenID.put("Repeat(", new ControlStructure.Repeat());
 		tokenID.put("For(", new ControlStructure.For());
+		tokenID.put("Fun ", new ControlStructure.FunDef());
 		tokenID.put("End", new ControlStructure.End());
+		tokenID.put("rand", new Literal.Rand());
+		tokenID.put("getKey", new Literal.GetKey());
 		tokenID.put(":", new Colon());
 		tokenID.put(",", new Comma());
 		tokenID.put("(", new Parenthesis(true));
 		tokenID.put(")", new Parenthesis(false));
+		tokenID.put("{", new ListBrace(true));
+		tokenID.put("}", new ListBrace(false));
+		tokenID.put("[", new ListBracket(true));
+		tokenID.put("]", new ListBracket(false));
 		tokenID.put("Pause", new Command("Pause"));
+		tokenID.put("Stop", new Command("Stop"));
 		tokenID.put("ClrHome", new Command("ClrHome"));
 		lex = new Lexer(tokenID);
 		parser = new Parser();
@@ -79,6 +96,7 @@ public class Compiler {
 	public void compile(String src) {
 		System.out.println(src.replace(":", "\n"));
 		List<Token> tokens = lex.tokenize(src);
+		System.out.println(tokens);
 		Token prgm = parser.parse(tokens);
 		prgm.print();
 		try {
@@ -92,14 +110,16 @@ public class Compiler {
 		code.add("#define divScratch $8000");
 		code.add(".org progStart-2");
 		code.add(".db $BB,$6D");
-		code.add("bcall(_ClrLCDFull)");
-		code.add("bcall(_HomeUp)");
+		code.add("call Setup");
 		prgm.compile(code); // Actual code
-		code.add("ret"); // Boiler plate at end and library inclusion
+		code.add("call Stop"); 
 		code.add("");
+		prgm.addData(code);
 		for (String statement : code) {
-			System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#")  || statement.startsWith(";") ? "" : "\t") + statement);
+			System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") || statement.startsWith(";") ? "" : "\t") + statement);
 		}
+		System.exit(0);
+		// Include lib.z80 at the bottom
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("res/lib.z80"));
 			String line;
@@ -110,9 +130,8 @@ public class Compiler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		try {
-			compileWeb(code);
+			compileWeb(code); // Send this to ClrHome and get it assembled
 		} catch (IOException e) {
 			System.err.println("Unable to connect to ClrHome Assembler.");
 			e.printStackTrace();
@@ -136,7 +155,7 @@ public class Compiler {
 			print.println(line);	
 		}
 		print.close();
-		
+
 		http.setDoOutput(true);
 		DataOutputStream wr = new DataOutputStream(http.getOutputStream());
 		wr.writeBytes(""
@@ -146,7 +165,7 @@ public class Compiler {
 				+ prgm);
 		wr.flush();
 		wr.close();
-		
+
 		BufferedReader in = new BufferedReader(new InputStreamReader(http.getInputStream()));
 		String response = "";
 		String input;
@@ -157,13 +176,13 @@ public class Compiler {
 		System.out.println("URL: " + http.getURL());
 		System.out.println("Response Code: " + http.getResponseCode());
 		System.out.println("Content-Type: " + http.getContentType());
-		
+
 		try {
 			Thread.sleep(500); // Unnecessary. Makes sure output Streams don't mix in console
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		Pattern errorPat = Pattern.compile("<p class=\"en err\">(.[^<]*)<\\/p>");
 		Matcher errorMat = errorPat.matcher(response);
 		boolean foundErrors = false;
@@ -185,7 +204,7 @@ public class Compiler {
 			}
 		}
 	}
-	
+
 	private static void downloadPrgm(String download) throws IOException {
 		System.out.println("Downloading from " + download);
 		URL url = new URL(download);

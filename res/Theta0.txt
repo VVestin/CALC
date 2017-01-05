@@ -1,3 +1,7 @@
-? This is a comment
-Disp(20+25)
+Fun FOO(X,Y)
+Disp("This is foo")
 Pause
+ClrHome
+End
+
+FOO(30,45)

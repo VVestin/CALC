@@ -3,23 +3,23 @@
 #define divScratch $8000
 .org progStart-2
 .db $BB,$6D
+	call Setup
+	call Stop
+	
+String1:
+.db 11,"This is foo"
+	;.module Setup
+	; Does all of the setup necessary to run a program.
+	; Currently this is only setting InitStack for Stop to work
+	; Must be called first thing on  run program
+Setup:
 	bcall(_ClrLCDFull)
 	bcall(_HomeUp)
-	ld a,$14
-	ld de,$0000
-	call PushIntLiteral
-	ld a,$19
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	call Disp
-	bcall(_GetKey)
+	pop bc
+	ld (InitStack),sp
+	push bc
+	; TODO set LSFR seed to a random number (register R and System time?)
 	ret
-	
-IntArg0:
-.db $00, $00, $00
-IntArg1:
-.db $00, $00, $00
 	
 	;.module FreeIntArg0
 	; Puts the integer at one below the top of the stack into IntArg0 and then frees it
@@ -38,7 +38,7 @@ _FreeIntArg0Loop:
 	inc hl
 	inc de
 	djnz _FreeIntArg0Loop
-	call FreeInt
+	call Free
 	ret
 	
 	;.module FreeIntArg1
@@ -58,31 +58,84 @@ _FreeIntArg1Loop:
 	inc hl
 	inc de
 	djnz _FreeIntArg1Loop
-	call FreeInt
+	call Free
+	ret
+	
+	;.module Pause
+	; TODO make it only accept the enter key
+Pause:
+	bcall(_GetKey)
+	ret
+	
+	;.module ClrHome
+ClrHome:
+	bcall(_ClrScrnFull)
+	bcall(_HomeUp)
+	ret
+	
+	;.module Stop
+Stop:
+	ld sp,(InitStack)
+	res 5,(iy+0) 
 	ret
 	
 	;.module If
 	; Checks the value on top of the stack, if it is false jumps to hl
+	; What was I thinking when I wrote this the first time?
 If:
+	ex de,hl ; hl is just easier to work with
 	pop bc
-	pop de
+	pop hl ; Number to check
 	push bc
+	xor a ; Zero out a
 	ld b,3
 _IfCheckLoop:
-	ld a,(de)
-	or a
-	ret nz
+	ld c,(hl)
+	inc hl
+	or c
 	djnz _IfCheckLoop
+	dec hl
+	dec hl
+	dec hl
+	jp nz,_IfTrue
 	pop bc
-	jp (hl) 
+	push de ; Swap return address to de
+_IfTrue:
+	push hl
+	call Free
+	ret
 	
+	;.module PushStringLiteral
+	; Allocates and pushes a pointer to a copy of the string string at hl
+PushStringliteral:
+	push hl
+	ld c,(hl)
+	inc c
+	call Alloc
+	pop de ; Pointer to the allocated chunk
+	pop hl ; Pointer to the string literal
+	push de
+	ld b,(hl)
+	inc b
+_PushStringLiteralLoadLoop:
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	or a
+	djnz _PushStringLiteralLoadLoop
+	pop de
+	pop hl
+	push de
+	jp (hl)
 	
 	;.module PushIntLiteral
 	; Pushes the number in a (lsb) and de (msb) 
 PushIntLiteral:
 	push de
 	push af
-	call AllocInt
+	ld c,3
+	call Alloc
 	pop hl
 	pop af
 	pop de
@@ -98,15 +151,130 @@ PushIntLiteral:
 	ex de,hl
 	jp (hl)
 	
+NewList:
+.dw $00
+PushListRetLoc:
+.dw $00
+	;.module PushListLiteral
+	; Pushes b integers from the stack onto a new list and leaves the list on the stack
+PushListLiteral:
+	pop hl
+	ld (PushListRetLoc),hl
+	ld a,b
+	add a,b
+	add a,b ; Multiply by 3 because 3 byte integers
+	inc a ; Add 1 for size byte
+	ld c,a
+	push bc
+	call Alloc
+	pop hl ; pointer to new list
+	pop bc
+	ld (NewList),hl
+	ld (hl),b
+	inc hl
+_PushListLiteralLoop:
+	pop de
+	ld a,(de)
+	ld (hl),a
+	inc de
+	inc hl
+	ld a,(de)
+	ld (hl),a
+	inc de
+	inc hl
+	ld a,(de)
+	ld (hl),a
+	inc hl
+	dec de
+	dec de
+	push bc
+	push hl
+	push de
+	call Free
+	pop hl
+	pop bc
+	djnz _PushListLiteralLoop
+	ld de,(NewList)
+	push de
+	ld hl,(PushListRetLoc)
+	jp (hl)
+	
+	;.module LoadListVar
+	; Locationod StrVar stored in de
+LoadListVar:
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	ld a,(hl)
+	ld c,a
+	add a,c
+	add a,c
+	ld c,a
+	inc c
+	push hl
+	call Alloc
+	pop de ; New list
+	pop hl ; List var
+	push de
+	ld b,(hl)
+	ld a,b
+	add a,b
+	add a,b
+	ld b,a
+	inc b
+_LoadListVarLoop:
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	djnz _LoadListVarLoop
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
 	;.module StoIntVar
 	; Takes 3 bytes from the number at the top of the stack and moves them to de
 StoIntVar:
 	pop bc
 	pop hl
 	push bc
+	push hl
 	ld b,0
 	ld c,3
 	ldir
+	call Free
+	ret
+	
+	;.module StoStrVar
+	; Takes the string at the top of the stack and stores a pointer to it in de
+	; Checks if there is already a string stored there and frees it
+StoStrVar:
+	ld a,(de)
+	ld b,a
+	inc de
+	ld a,(de)
+	or b
+	jr z,_StoStrVarSkipFree
+	ld l,b
+	ld a,(de)
+	ld h,a
+	push de
+	push hl
+	call Free
+	pop de
+_StoStrVarSkipFree:
+	pop bc
+	pop hl
+	push bc
+	dec de
+	ld a,l
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
 	ret
 	
 	;.module Negate
@@ -129,11 +297,12 @@ _NegateCPLLoop:
 	ret
 	
 	;.module AbsValue
-	; If the number at the top of the stack is negative it is negated.
+	; If negative the, number at the top of the stack is negative it is negated
 AbsValue:
 	pop hl
 	pop de
 	push de
+	push hl
 	inc de
 	inc de
 	ld a,(de)
@@ -141,18 +310,20 @@ AbsValue:
 	jr z,_AbsValueSkipNegate
 	call Negate
 _AbsValueSkipNegate:
-	jp (hl)
+	ret
 	
 	;.module Compare
 	; Compares two numbers at the top of the stack
 	; Does a greater than if carry is set, otherwise a less than
+	; FIXED start comparison at MSB not LSB
 Compare:
-	pop bc
-	pop hl
-	pop de
-	push bc
-	jr c, _CompareGreater
-	ex de,hl
+	call FreeIntArg0
+	call FreeIntArg1
+	ld hl,IntArg0+2
+	ld de,IntArg1+2
+	jr c, _CompareGreater ; Luckily, carry is spared after FreeIntArg. This is dangerous
+	ld de,IntArg0+2
+	ld hl,IntArg1+2
 _CompareGreater:
 	ld b,3
 _CompareLoop:
@@ -160,6 +331,8 @@ _CompareLoop:
 	cp (hl)
 	jr c,_CompareTrue
 	jr nz,_CompareFalse
+	dec de
+	dec hl
 	djnz _CompareLoop
 _CompareFalse:
 	ld b,0
@@ -168,16 +341,17 @@ _CompareTrue:
 	ld b,1
 	jp _EqualsPushResult
 	
-	; .module CompareEqual (<= and >=)
+	;.module CompareEqual (<= and >=)
 	; Compares two numbers at the top of the stack
 	; Does a greater than if carry is set, otherwise a less than
 CompareEqual:
-	pop bc
-	pop hl
-	pop de
-	push bc
+	call FreeIntArg0
+	call FreeIntArg1
+	ld hl,IntArg0+2
+	ld de,IntArg1+2
 	jr c, _CompareEqualGreater
-	ex de,hl
+	ld de,IntArg0+2
+	ld hl,IntArg1+2
 _CompareEqualGreater:
 	ld b,3
 _CompareEqualLoop:
@@ -185,6 +359,8 @@ _CompareEqualLoop:
 	cp (hl)
 	jr c,_CompareEqualTrue
 	jr nz,_CompareEqualFalse
+	dec hl
+	dec de
 	djnz _CompareEqualLoop
 _CompareEqualTrue:
 	ld b,1
@@ -196,10 +372,10 @@ _CompareEqualFalse:
 	;.module Or
 	; Looks at two numbes on top of the stack. Pushes on a 1 if either is nonzero, otherwise a 0.
 Or:
-	pop bc
-	pop hl
-	pop de
-	push bc
+	call FreeIntArg0
+	call FreeIntArg1
+	ld hl,IntArg0
+	ld de,IntArg1
 	ld b,3
 _OrLoop:
 	ld a,(de)
@@ -220,10 +396,10 @@ _OrTrue:
 	;.module And
 	; Looks at two numbers on top of the stack. Pushes on a 1 if both are nonzero, otherwise a 0.
 And:
-	pop bc
-	pop hl
-	pop de
-	push bc
+	call FreeIntArg0
+	call FreeIntArg1
+	ld hl,IntArg0
+	ld de,IntArg1
 	ld b,3
 _AndLoop1:
 	ld a,(de)
@@ -250,9 +426,8 @@ _AndTrue:
 	;.module Not
 	; Looks at number at the top of the stack. pushes a 0 if nonzero and 1 if 0
 Not:
-	pop bc
-	pop hl
-	push bc
+	call FreeIntArg0
+	ld hl,IntArg0
 	ld b,3
 _NotLoop:
 	ld a,(hl)
@@ -269,10 +444,10 @@ _NotTrue:
 	;.module Equals
 	; Compares two numbers at the top of the stack for equality, leaving the stack with a 1 if equal
 Equals:
-	pop bc
-	pop hl
-	pop de
-	push bc
+	call FreeIntArg0
+	call FreeIntArg1
+	ld hl,IntArg0
+	ld de,IntArg1
 	ld b,3
 _EqualsLoop:
 	ld a,(de)
@@ -286,54 +461,139 @@ _EqualsLoop:
 _EqualsNotEqual:
 	ld b,0
 _EqualsPushResult:
-	ld hl,(TempPtr)
+	push bc
+	ld c,3
+	call Alloc
+	pop hl
+	pop bc
+	pop de
+	push hl
 	ld (hl),b
-	ld b,2
-_EqualsPushZeroes:
 	inc hl
 	ld (hl),0
-	djnz _EqualsPushZeroes
 	inc hl
-	ld (TempPtr),hl
-	dec hl
+	ld (hl),0
+	ld h,d
+	ld l,e
+	jp (hl)
+	
+	;.module Rand
+	; Generates a random number between 0 and 16,777,216
+Rand:
+	ld c,3
+	call Alloc
+	call RandLFSR
+	pop hl
+	ld (hl),a
+	inc hl
+	push hl
+	call RandLFSR
+	pop hl
+	ld (hl),a
+	inc hl
+	push hl
+	call RandLFSR
+	pop hl
+	ld (hl),a
 	dec hl
 	dec hl
 	pop de
+	push hl
 	ex de,hl
+	jp (hl)
+	
+	;.module GetKey
+	; Gets the key currently being pressed and pushes it to the stack
+GetKey:
+	ld c,3
+	call Alloc
+	bcall(_GetCSC)
+	pop hl
+	push hl
+	ld (hl),a
+	inc hl
+	ld (hl),$0
+	inc hl
+	ld (hl),$0
+	pop de
+	pop hl
 	push de
 	jp (hl)
+	
+	;------LFSR------
+	;James Montelongo
+	;optimized by Spencer Putt
+;out:
+	; a = 8 bit random number
+RandLFSR:
+	ld hl,LFSRSeed+4
+	ld e,(hl)
+	inc hl
+	ld d,(hl)
+	inc hl
+	ld c,(hl)
+	inc hl
+	ld a,(hl)
+	ld b,a
+	rl e 
+	rl d
+	rl c 
+	rla
+	rl e 
+	rl d
+	rl c 
+	rla
+	rl e 
+	rl d
+	rl c 
+	rla
+	ld h,a
+	rl e 
+	rl d
+	rl c 
+	rla
+	xor b
+	rl e 
+	rl d
+	xor h
+	xor c
+	xor d
+	ld hl,LFSRSeed+6
+	ld de,LFSRSeed+7
+	ld bc,7
+	lddr
+	ld (de),a
+	ret
+LFSRSeed:
+.db $F1, $11, $EA, $02, $C4, $45, $77, $4A
 	
 	;.module Mult
 	; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
 Mult:
-	ld b,3
-	ld hl,_MultResult
-_MultClearResultLoop:
-	ld (hl),0
+	ld hl,MultResult
+	call FreeIntArg0
+	call FreeIntArg1
+	ld (hl),$0
 	inc hl
-	djnz _MultClearResultLoop
-	pop bc
-	pop hl
-	pop de
-	push bc
+	ld (hl),$0
+	inc hl
+	ld (hl),$0
 	ld b,24
 _MultLoop:
 	push bc
-	ld b,2
-	ex de,hl
-	inc hl
-	inc hl
+	ld hl,IntArg1+2
 	srl (hl)
-_MultShiftDELoop:
 	dec hl
+	ld b,2 ; Shift every remaining byte in IntArg1
+_MultShiftLoopB:
 	rr (hl)
-	djnz _MultShiftDELoop
-	ex de,hl
+	dec hl
+	djnz _MultShiftLoopB
 	jr nc,_MultSkipAdd
-	push de
-	ld de,_MultResult
+	ld hl,IntArg0
+	ld de,MultResult
 	ld b,3
-	ccf ; Resets carry because carry should always be true here
+	xor a
 _MultAddLoop:
 	ld a,(de)
 	adc a,(hl)
@@ -341,45 +601,113 @@ _MultAddLoop:
 	inc hl
 	inc de
 	djnz _MultAddLoop
-	dec hl
-	dec hl
-	dec hl
-	pop de
 _MultSkipAdd:
-	ld b,2
+	ld hl,IntArg0
 	sla (hl)
-_MultShiftHLLoop:
 	inc hl
+	ld b,2
+_MultShiftLoopA:
 	rl (hl)
-	djnz _MultShiftHLLoop
-	dec hl
-	dec hl
+	inc hl
+	djnz _MultShiftLoopA
 	pop bc
 	djnz _MultLoop
-	; Store the value in _MultResult in temp and push to stack 
-	ld hl,_MultResult
-	ld de,(TempPtr)
-	ld b,3
-_MultPushLoop:
+	ld hl,MultResult
 	ld a,(hl)
-	ld (de),a
 	inc hl
-	inc de
-	djnz _MultPushLoop
-	dec de
-	dec de
-	dec de
+	ld d,(hl)
+	inc hl
+	ld e,(hl) 
+	call PushIntLiteral
+	pop de
 	pop hl
 	push de
-	push hl
-	ld de,(TempPtr)
-	ld h,0
-	ld l,3
-	add hl,de
-	ld (TempPtr),hl
-	ret
-_MultResult:
+	jp (hl)
+MultResult:
 .db $00, $00, $00, $00, $00, $00
+	
+	;.module Divide
+	; Pops 2 numbers off the stack and divides them by one another and pushes the quotient
+Divide:
+	call FreeIntArg1
+	call FreeIntArg0
+	call Div24by24
+	; edc to ade
+	ld a,e
+	ld e,c
+	call PushIntLiteral
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	;.module Modulo
+	; Pops 2 numbers off the stack and divides them by one another and pushes the remainder
+Modulo:
+	call FreeIntArg1
+	call FreeIntArg0
+	call Div24by24
+	; lha to ade
+	ld e,a
+	ld d,h
+	ld a,l
+	call PushIntLiteral
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	; Routine provided by Runer112 on Cemetech.org. Thanks!
+Div24by24:
+	ld hl,IntArg1
+	ld e,(hl)
+	inc hl
+	ld d,(hl)
+	inc hl
+	ld c,(hl)
+	push de
+	ld de,IntArg0
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	inc de
+	ld a,(de)
+	pop de
+	ld b,a   ;INPUTS: ahl = dividend cde = divisor
+	push hl   ;OUTPUTS: cde = quotient ahl = remainder
+	pop ix
+	ld l,24
+	push hl
+	xor a
+	ld h,a
+	ld l,a
+__Div24by24loop:
+	add ix,ix
+	rl b
+	adc hl,hl
+	rla
+	cp c
+	jr c,__Div24by24skip
+	jr nz,__Div24by24setbit
+	sbc hl,de
+	add hl,de
+	jr c,__Div24by24skip
+__Div24by24setbit:
+	sbc hl,de
+	sbc a,c
+	inc ix
+__Div24by24skip:
+	ex (sp),hl
+	dec l
+	ex (sp),hl
+	jr nz,__Div24by24loop
+	pop de
+	ld c,b
+	push ix
+	pop de
+	ret
 	
 	;.module Add			; ORG IDE does not recognize .module directive :(
 	; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
@@ -398,7 +726,8 @@ _AddLoop:
 	inc hl
 	inc de
 	djnz _AddLoop
-	call AllocInt
+	ld c,3
+	call Alloc
 	ld hl,IntArg0
 	pop de
 	ld b,3
@@ -415,31 +744,406 @@ _AddStoreResultLoop:
 	push de
 	jp (hl)
 	
-	; .module Disp
-	; Displays the number at the top of the hardware stack.
-	; Destroys pretty much every register and flag
-	; Destroys the inputted number
-	; TODO stop displaying leading zeroes. 
-	; TODO right justify
-	; TODO move number logic to a num2str function and make Disp function display strings
+	;.module ListGet
+	; Gets the element at the index on the top of the list from the list
+	; Pushes that element on to the stack and deallocates the list
+ListGet:
+	pop bc
+	pop de ; The index
+	pop hl ; The List
+	push de
+	push bc
+	ld a,(de)
+	ld b,a
+	add a,b
+	add a,b
+	ld c,a
+	ld b,0
+	add hl,bc
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	dec hl
+	dec hl
+	push hl
+	call Free ; Free the list
+	ret
+	
+	;.module ListSet
+	; Sets the element at the index on top of the stack in the list below it to the value below that 
+	; Frees all inputs but the list
+ListSet:
+	pop bc
+	pop de ; The index
+	pop hl ; The List
+	push bc
+	push de
+	ld a,(de)
+	ld b,a
+	add a,b
+	add a,b
+	ld c,a
+	ld b,0
+	ex de,hl ; Dereference hl
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	add hl,bc
+	inc hl
+	pop de
+	push hl
+	push de
+	call Free ; Free the index
+	pop hl
+	pop bc
+	pop de ; The value to set
+	push bc
+	push de
+	ld a,(de)
+	ld (hl),a
+	inc hl
+	inc de
+	ld a,(de)
+	ld (hl),a
+	inc hl
+	inc de
+	ld a,(de)
+	ld (hl),a
+	call Free ; Free the index
+	ret
+	
+	;.module Dimension
+	; Frees the list on top of the stack and pushes its size
+Dimension:
+	ld c,3
+	call Alloc
+	pop de
+	pop bc
+	pop hl
+	push de
+	push bc
+	ld a,(hl)
+	ld (de),a
+	inc de
+	ld a,$0
+	ld (de),a
+	inc de
+	ld (de),a
+	push hl
+	call Free
+	ret
+	
+	;.module Augment
+	; Concatenates the two lists at the top of the stack into a new list
+Augment:
+	pop bc
+	pop de ; List1
+	pop hl ; List2
+	push bc
+	ld a,(de)
+	add a,(hl)
+	ld c,a
+	ld b,a
+	add a,c
+	add a,c
+	ld c,a
+	inc c ; Include size bit
+	ld a,b ; Actual dimention
+	push hl
+	push de
+	push af ; a holds concatenated size
+	call Alloc
+	pop de ; Allocated string
+	pop af ; Size
+	pop hl ; Str1
+	push de
+	ld (de),a
+	inc de
+	push hl
+	ld b,(hl) ; Str1 size
+	xor a
+	add a,b
+	add a,b
+	add a,b
+	ld b,a
+_AugmentLoadList1:
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc de
+	djnz _AugmentLoadList1
+	pop hl
+	push de
+	push hl
+	call Free ; Free List1
+	pop de
+	pop bc
+	pop hl
+	push bc
+	push hl
+	ld b,(hl) ; List2 size
+	xor a
+	add a,b
+	add a,b
+	add a,b
+	ld b,a
+_AugmentLoadList2:
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc de
+	djnz _AugmentLoadList2
+	call Free ; Free List2
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	;.module Pop
+	; Location of list to pop from stored in de
+	; Removes the last item from the list and pushes it to the stack. Decreases list size.
+Pop:
+	ld a,(de)
+	dec a
+	ld b,a
+	ld c,a
+	add a,c
+	add a,c
+	ld c,a
+	ld a,b
+	ld (de),a
+	ld b,0
+	ex de,hl
+	add hl,bc
+	inc hl
+	push hl
+	ld c,3
+	call Alloc
+	pop de
+	pop hl
+	pop bc
+	push de
+	push bc
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	ret
+	
+	;.module Concat
+	; Concatonates the two strings at the top of the stack into a new string
+	; Strings preceded by length byte, then string
+	; TODO check if the concatenated strings would fit within either of the allocated strings
+Concat:
+	pop bc
+	pop hl ; Str1
+	pop de ; Str2
+	push bc
+	ld a,(de)
+	add a,(hl)
+	ld c,a
+	inc c ; Include size bit
+	push hl
+	push de
+	push af ; a holds concatenated size
+	call Alloc
+	pop de ; Allocated string
+	pop af ; Size
+	pop hl ; Str1
+	push de
+	ld (de),a
+	inc de
+	push hl
+	ld b,(hl) ; Str1 size
+_ConcatLoadStr1:
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc de
+	djnz _ConcatLoadStr1
+	pop hl
+	push de
+	push hl
+	call Free ; Free Str1
+	pop de
+	pop bc
+	pop hl
+	push bc
+	push hl
+	ld b,(hl) ; Str2 size
+_ConcatLoadStr2:
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc de
+	djnz _ConcatLoadStr2
+	call Free ; Free Str2
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	;.module SubString
+	; Arguments: [top] start, length, string [bottom]
+	; Pushes the substring starting at start that is length long.
+	; TODO error checking and handling
+SubString:
+	call FreeIntArg0 ; Start
+	call FreeIntArg1 ; Length
+	ld a,(IntArg1)
+	ld c,a
+	inc c
+	call Alloc
+	pop de ; New string
+	pop bc 
+	pop hl ; Old string
+	push bc
+	push de
+	push hl
+	ld a,(IntArg0)
+	dec a
+	ld c,a
+	ld b,0
+	add hl,bc
+	ld a,(IntArg1)
+	ld (de),a
+	ld b,a
+_SubStringLoop:
+	inc de
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	djnz _SubStringLoop
+	call Free
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	;.module Output
+	; Frees 2 ints (row and colomn) and a string and displays the string at the coordinates
+	; Stack: [top] row, col, string [bottom]
+Output:
+	res AppAutoScroll, (IY + AppFlags)
+	call FreeIntArg0 ; row
+	call FreeIntArg1 ; col
+	ld hl,IntArg0
+	ld a,(hl)
+	dec a
+	ld (CurRow),a
+	ld hl,IntArg1
+	ld a,(hl)
+	dec a
+	ld (CurCol),a
+	pop de
+	pop hl
+	push de
+	push hl
+	ld b,(hl)
+_OutputLoop:
+	inc hl
+	ld a,(hl)
+	bcall(_PutC)
+	djnz _OutputLoop
+	call Free
+	ret
+	
+	;.module Disp
+	; Frees and Displays the string at the top of the hardware stack
 Disp:
+	set AppAutoScroll, (IY + AppFlags)
+	ld a,0
+	ld (CurCol),a
+	pop de
+	pop hl
+	push de
+	push hl
+	ld b,(hl)
+_DispLoop:
+	inc hl
+	ld a,(hl)
+	bcall(_PutC)
+	djnz _DispLoop
+	call Free
+	bcall(_NewLine)
+	ret
+	
+DispNumCaller:
+.dw $00
+	;.module DispNum
+	; Frees and displays the number at the top of the hardware stack.
+DispNum:
+	ld de,DispNumCaller
+	pop hl
+	ld a,l
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
+	call Num2Str
+	call Disp
+	ld de,DispNumCaller
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	jp (hl)
+	
+Num2StrOut:
+.dw $00 ; Holds a pointer to allocated string
+	;.module Num2Str
+	; Converts the integer in IntArg0 to a string and pushes the results to the stack 
+	; Maye be a faster way to do this using division and remainders (the usual way) instead of subtraction
+Num2Str:
 	call FreeIntArg0
+	ld c,9
+	call Alloc
+	pop hl
+	ld de,Num2StrOut
+	ld a,l
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
+	ld de,(Num2StrOut)
+	ld a,$1 
+	ld (de),a ; Always want to display at least 1 character
+	inc de
+	ld a,'0'
+	ld (de),a
 	ld de,IntArg0
 	ld	hl,Ten_Million			; HL is the base 10 number to subtract
 	ld	b,8				; Number of digits needed to check at max
 	ld	c,0					; C counts how many subtractions occur before an overflow
-_DispLoop:
+_Num2StrNumLoop:
 	push bc
 	ld	b,2
 	scf
 	ccf
-_DispSubLoop:
+_Num2StrNumSubLoop:
 	ld	a,(de)
 	sbc a,(hl)
 	ld	(de),a
 	inc hl
 	inc de
-	djnz _DispSubLoop
+	djnz _Num2StrNumSubLoop
 	pop bc
 	ld	a,(de)
 	sbc a,(hl)				; Last subtraction goes outside of loop to check underflow
@@ -448,107 +1152,234 @@ _DispSubLoop:
 	dec de
 	dec hl					; Reset HL for next subtraction. (there may be a more efficient way to subtract 3)
 	dec hl
-	jr	nc,_DispNoUnderflow	; Check for underflow with carry register
-	ld	a,'0'
+	jr	nc,_Num2StrNumNoUnderflow	; Check for underflow with carry register
+	ld a,'0'
 	add a,c
-	bcall(_PutC)
+	push hl
+	push de
+	push bc
+	ld hl,(Num2StrOut)
+	ld b,(hl)
+	dec b
+	jr nz,_Num2StrSkipDigitCheck
+	cp '0'
+	jr z,_num2StrSkipLeadingZero
+_num2StrSkipDigitCheck:
+	inc b
+	inc (hl)
+_num2StrLoadDigitLoop:
+	inc hl
+	djnz _num2StrLoadDigitloop
+	ld (hl),a
+_num2StrSkipLeadingZero:
+	pop bc
+	pop de
+	pop hl
 	ld	c,0
 	push bc
 	ld	b,3
-_DispAddLoop:
+_Num2StrNumAddLoop:
 	ld	a,(de)
 	adc a,(hl)
 	ld	(de),a
 	inc de
 	inc hl
-	djnz	_DispAddLoop
+	djnz	_Num2StrNumAddLoop
 	dec de
 	dec de
 	dec de
 	pop bc
 	dec b
-	jr	z,_DispEnd
-	jr	_DispSkipUnderflow
-_DispNoUnderflow:
+	jr	z,_Num2StrNumEnd
+	jr	_Num2StrNumSkipUnderflow
+_Num2StrNumNoUnderflow:
 	inc c
-_DispSkipUnderflow:
-	jr	_DispLoop
-_DispEnd:
-	bcall(_NewLine)
-	ret
+_Num2StrNumSkipUnderflow:
+	jr	_Num2StrNumLoop
+_Num2StrNumEnd:
+	ld hl,(Num2StrOut)
+	ld a,(hl)
+	dec a
+	jr z,_Num2StrSkipDec ; Don't decrement if length is already 1
+	dec (hl)
+_Num2StrSkipDec:
+	ex de,hl
+	pop hl
+	push de
+	jp (hl)
 	
 	;.module LoadIntVar 
 	; Location of Int Var stored in de
 LoadIntVar:
-	ld	hl,(TempPtr)
-	ld	b,3
-_LoadIntVar:
-	ld	a,(de)
-	ld	(hl),a
+	push de
+	ld c,3
+	call Alloc
+	pop de ; Allocated memory
+	pop hl ; Location to load from
+	push de
+	ld a,(hl)
+	ld (de),a
+	inc de
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	inc de
+	inc hl
+	ld a,(hl)
+	ld (de),a
+	pop de
+	pop hl
+	push de
+	jp (hl)
+	
+	;.module LoadStrVar
+	; Locationod StrVar stored in de
+LoadStrVar:
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	ld c,(hl)
+	inc c
+	push hl
+	call Alloc
+	pop de ; New string
+	pop hl ; Str var
+	push de
+	ld b,(hl)
+	inc b
+_LoadStrVarLoop:
+	ld a,(hl)
+	ld (de),a
 	inc hl
 	inc de
-	djnz		_LoadIntVar
-	dec hl
-	dec hl
-	dec hl
-	pop bc
-	push hl
-	push bc
-	ld	de,(TempPtr)
-	ld	h,0
-	ld	l,3
-	add hl,de
-	ld	(TempPtr),hl
-	ret
-	
-	;.module AllocInt
-	; Allocates 3 bytes of memory and pushes the address on to the stack 
-AllocInt:
+	djnz _LoadStrVarLoop
 	pop de
-	ld hl,(FreePtr)
-	ld a,(hl)
-	inc hl
-	or (hl)
-	inc hl
-	push hl ; Push the location of free memory
-	jr z,_AllocIntSplit
-	dec hl
-	ld c,(hl)
-	dec hl
-	ld b,(hl)
-	ld (FreePtr),bc
-	ex de,hl
-	jp (hl) ; return
-_AllocIntSplit:
-	inc hl ; Make hl point to next available bytes in the big free space
-	inc hl
-	inc hl
-	ld (FreePtr),hl
-	ld (hl),0
-	inc hl
-	ld (hl),0
-	ex de,hl
+	pop hl
+	push de
 	jp (hl)
 	
-	;.module FreeInt
-	; Frees 3 bytes of memory at the top of the stack and puts them back into the free list on the heap
-FreeInt:
-	pop bc
-	pop de
-	dec de
-	ld hl,FreePtr+1
-	ld a,(hl)
+AllocPrev:
+.dw $0000
+	;.module Alloc
+	; allocates c bytes on the heap and returns a pointer to those bytes.
+	; Does not coalesce. Max size is 256 (1 byte).
+	; Because no coalesce, will not split chunks. 
+	; Possible to  ask for 3 bytes and get a 256 byte chunk.
+	; struct Block {
+	; 		Next*		2 byte
+	; 		Size		1 byte
+	;		Payload	x byte
+	; }
+	; 1. Find a block
+	; 2. Change the previous block to point where its next block points
+	; 3. Set the size of the data in the structure
+	; 4. Push a pointer to the block and return
+Alloc:
+	ld de,AllocPrev
+	ld hl,FreePtr
+	ld a,l
 	ld (de),a
-	dec de
+	inc de
+	ld a,h
+	ld (de),a
+	ld b,0
+	ld hl,(FreePtr)
+_AllocFindMemLoop:
+	ld a,(hl)
+	inc hl
+	or (hl) ; check if hl is 00.
+	jr z,_AllocSplitEnd
+	inc hl
+	ld a,(hl) ; load capacity into a
+	cp c
+	jr z,_AllocNoSplit
+	jr nc,_AllocSplit
 	dec hl
+	dec hl
+	ld de,AllocPrev ; Save the location of the previous block
+	ld a,l
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
+	ld d,h
+	ld e,l ; Make hl point to the next block in the linked list
+	ld a,(de)
+	ld l,a
+	inc de
+	ld a,(de)
+	ld h,a
+	jr _AllocFindMemLoop
+_AllocSplit:
+	; TODO write this to actually split once coalescing works. 
+	; Tradeoff between internal and external fragmentation
+	ld c,a
+_AllocNoSplit:
+	; Push and change the previous block to point to this block's next
+	inc hl
+	push hl
+	ld de,(AllocPrev)
+	dec hl ; hl points to size
+	ld (hl),c
+	dec hl
+	dec hl ; hl points to next*
 	ld a,(hl)
 	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	pop de
+	pop hl
+	push de
+	jp (hl) ; Return
+_AllocSplitEnd:
+	inc hl ; hl points to the size
+	ld (hl),c
+	inc hl ; hl points to the payload
+	push hl
+	ld d,0
+	ld e,c
+	add hl,de ; Change hl to point to the new start of blank memory
+	ld de,(AllocPrev)
+	ld a,l ; Load in little endian order
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
+	ld (hl),0 ; Set the next pointer of the end bank to 00
+	inc hl
+	ld (hl),0
+	pop de
+	pop hl
+	push de
+	jp (hl) ; Return
+	
+	;.module Free
+	; Frees the memory pointed to at the top of the stack
+	; Just a linked list insertion. Later, must coalesce (needs prev pointer).
+	; TODO Coalesce!
+Free:
+	pop de
+	pop hl
+	push de
+	dec hl
+	dec hl
+	dec hl ; hl points to next
+	ld de,(FreePtr) ; Load current beginning address into the freed block's next
 	ld (hl),e
 	inc hl
-	ld (hl),d
-	ld h,b
-	ld l,c
-	jp (hl)
+	ld (hl),d ; Load in little endian order
+	ld de,FreePtr ; Make the freed block the beginning of the free list
+	dec hl ; hl points to beginning of block
+	ld a,l
+	ld (de),a
+	inc de
+	ld a,h
+	ld (de),a
+	ret 
 	
 Billion:
 .db $00, $CA, $9A, $3B
@@ -571,14 +1402,26 @@ Ten:
 One:
 .db $01, $00, $00
 	
+IntArg0:
+.db $00, $00, $00
+IntArg1:
+.db $00, $00, $00
+	
 	; Table of IntVars (A-Z)
 IntVar:
 .ds $4E, $0
+StrVar:
+.ds $14, $0
+ListVar:
+.ds $0B, $0
 	
+InitStack:
+.dw $00
 TempPtr:
-	; Just make the compiler happy, take out later
+	; TODO remove this
 FreePtr:
 .dw Heap
 	
 Heap:
 .dw $00
+.ds $200, $0 ; 512 bytes for the heap otherwise OS will put important data there

@@ -1,17 +1,25 @@
-9/4*6(A+B+1)->B
-B*3->B
-If B>0
-50->B
-If abs(B)=/=6 and B<=7
-Disp((2B-1)/5)
+": + *"->Str1
+12->W
+8->H
+1->S
+1->T
+While(S<W and T<H)
+For(X,S,W)
+Output(T,X,Str1)
 End
+T+1->T
+For(Y,T,H)
+Output(Y,W,Str1)
 End
+W-1->W
+For(X,S,W)
+Output(H,X,Str1)
+End
+H-1->H
+For(Y,T,H)
+Output(Y,S,Str1)
+End
+S+1->S
+Disp({1,2,3})
 Pause
-1->A
-While A<5
-Disp(A)
-2A-B+B->A
-End
-For(C,_2,2,2
-Disp(C/2)
 End

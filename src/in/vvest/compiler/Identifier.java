@@ -13,8 +13,24 @@ public class Identifier extends Token {
 	}
 	
 	public void compile(List<String> code) {
-		code.add("ld de,IntVar + " + 3 * (id.charAt(0) - 'A'));
-		code.add("call LoadIntVar");
+		code.add("ld de," + getAddress());
+		if (type == Type.INTEGER) {
+			code.add("call LoadIntVar");
+		} else if (type == Type.STRING) {
+			code.add("call LoadStrVar");
+		} else if (type == Type.LIST) {
+			code.add("call LoadListVar");
+		}
+	}
+
+	public String getAddress() {
+		if (type == Type.INTEGER) {
+			return "IntVar+" + 3 * (id.CharAt(0) - 'A');
+		} else if (type == Type.STRING) {
+			return "StrVar+" + 2 * (id.CharAt(3) - '0');
+		} else if (type == Type.LIST) {
+			return "listVar+" + 2 * (id.CharAt(1) - '0');
+		}
 	}
 
 	public boolean isCompileable() {

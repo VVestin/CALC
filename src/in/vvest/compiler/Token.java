@@ -14,6 +14,10 @@ public abstract class Token {
 	public abstract void compile(List<String> code);
 	public abstract boolean isCompileable();
 
+	public Type getType() {
+		return Type.VOID;
+	}
+
 	public String getValue() {
 		return "";
 	}
@@ -46,12 +50,19 @@ public abstract class Token {
 		}
 	}
 
+	public void addData(List<String> code) { 
+		for (Token child : children) {
+			child.addData(code);
+		}
+	}
+
 	public String toString() {
 		String val = getValue();
 		return "[" + getClass().getSimpleName() + (val.length() > 0 ? " " + getValue() : "") + "]";
 	}
 
 	public boolean equals(Token t) {
-		return t.getClass().equals(getClass());
+		return t == this;
+		// return t.getClass().equals(getClass());
 	}
 }

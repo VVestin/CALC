@@ -4,4 +4,5 @@ public enum Type {
 	STRING,
 	INTEGER,
 	LIST,
+	VOID
 }

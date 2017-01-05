@@ -33,16 +33,11 @@ public class Lexer {
 				// Tokenizes String Literals
 				// Important Difference! Tokens within strings will not be tokenized
 				// within a string literal (unlike TI-BASIC onCalc)
+				// I also went ahead and took out using -> to stop strings
 				int strEnd = src.indexOf("\"", 1);
-				if (strEnd != -1)
-					strEnd++;
-				// TODO fix bug with parsing Strings that have a real : in them, not a line break
-				if (src.indexOf(":") < strEnd && src.indexOf(":") != -1 || strEnd == -1)
-					strEnd = src.indexOf(":");
-				if (src.indexOf("->") < strEnd && src.indexOf("->") != -1 || strEnd == -1)
-					strEnd = src.indexOf("->");
 				if (strEnd == -1)
-					strEnd = src.length();
+					System.err.println("Syntax Error. String missing end quotation mark");
+				strEnd++;
 				tokens.add(new Literal(Type.STRING, src.substring(0, strEnd)));
 				src = src.substring(strEnd);
 			} else if (src.startsWith(COMMENT_CHARACTER)) {
@@ -75,11 +70,11 @@ public class Lexer {
 				if (!isNum(src.charAt(3)))
 					throw new RuntimeException(
 							"Lexical Analysis Failed. Unsupported String literal " + src.substring(0, 4));
-				tokens.add(new Literal(Type.STRING, src.substring(0, 4)));
+				tokens.add(new Identifier(Type.STRING, src.substring(0, 4)));
 				src = src.substring(4);
-			} else if (src.startsWith("[")) {
-				// TODO support matrices
-				throw new RuntimeException("Lexical Analysis Failed. Matrices not supported");
+			} else if (src.charAt(0) == 'L' && isNum(src.charAt(1))) {
+				tokens.add(new Identifier(Type.LIST, src.substring(0, 2)));
+				src = src.substring(2);
 			} else if (isUpperCaseLetter(src.charAt(0))) {
 				tokens.add(new Identifier(Type.INTEGER, src.substring(0, 1)));
 				src = src.substring(1);

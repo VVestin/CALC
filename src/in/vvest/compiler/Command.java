@@ -12,17 +12,15 @@ public class Command extends Token {
 	}
 
 	public void compile(List<String> code) {
-		if (command.equals("Pause")) {
-			code.add("bcall(_GetKey)"); // TODO make it so only [Enter] breaks a pause
-		} else if (command.equals("ClrHome")) {
-			code.add("bcall(_ClrLCDFull)");
-			code.add("bcall(_HomeUp)");
-		}
-
+		code.add("call " + command);
 	}
 
 	public boolean isCompileable() {
 		return true;
+	}
+
+	public String getValue() {
+		return command;
 	}
 
 	public Token copy() {

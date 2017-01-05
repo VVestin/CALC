@@ -1,5 +1,10 @@
+? Tests boolean operators
+For(A,0,1)
+Disp("not("+A+")",not(A))
+For(B,0,1)
+Disp(A+" or "+B,A or B)
+Disp(A+" and "+B,A and B)
+Pause
 ClrHome
-(4+5)*5->A
-A-15->B
-A+91(A=/=_5)->A
-Disp(A+B)
+End
+End
