@@ -1,6 +1,8 @@
 package in.vvest.compiler;
 
 import java.util.List;
+import java.util.Queue;
+import java.util.LinkedList;
 
 public abstract class ControlStructure extends Token {
 	public void compile(List<String> code) {
@@ -19,11 +21,38 @@ public abstract class ControlStructure extends Token {
 
 	public static class FunDef extends ControlStructure {
 		private String id;
-		public void compile(List<String> code) {
+		private Type returnType;
+		public void addData(List<String> code) {
+			for (Token t : children)
+				t.addData(code);
+			checkReturnType();
 			// push the values held in arg vars on to stack and swap them with passed in values
 			// generate block code
 			// if there is a return load return value into a special location in memory and jump to return code
 			// pop values off stack and restore them into their vars	
+
+			code.add(getAddress() + ":");
+			// Make SP point to the beginning of the arguments
+			if (children.size() > 0) {
+				code.add("pop hl");
+				code.add("ld (FuncTemp),hl");
+				for (int i = 0; i < children.size() - 1; i++) {
+					code.add("ld de," + ((Identifier) children.get(i)).getAddress());
+					code.add("call StoIntVar");
+				}
+				code.add("ld hl,(FuncTemp)");
+				code.add("push hl");
+			}	
+			children.get(children.size() - 1).compile(code);
+			code.add("FunReturn" + id + ":");
+			if (returnType != Type.VOID) {
+				code.add("pop de");
+				code.add("pop hl");
+				code.add("push de");
+				code.add("jp (hl)");
+			} else {
+				code.add("ret");
+			}
 		}
 		public void setID(String id) {
 			this.id = id;
@@ -31,15 +60,34 @@ public abstract class ControlStructure extends Token {
 		public int getArity() {
 			return children.size() - 1;
 		}
-		public Type getReturnType() {
-
-
+		public void checkReturnType() {
+			// Depth first search for Return statement
+			returnType = Type.VOID;
+			Queue<Token> search = new LinkedList<Token>();	
+			search.add(children.get(children.size() - 1));
+			while (!search.isEmpty()) {
+				for (Token t : search) {
+					if (t instanceof Function.Return) {
+						returnType = t.getType();
+						((Function.Return) t).setID(id);
+					}
+				}
+				int size = search.size();
+				for (int i = 0; i < size; i++) {
+					for (Token t : search.remove().getChildren()) {
+						search.add(t);
+					}
+				}
+			}
+		}
+		public String getAddress() {
+			return "DefFun" + id;
+		}
+		public Type getType() {
+			return returnType;
 		}
 		public String getValue() {
-			return id != null ? id : "";
-		}
-		public String getLabel() {
-			return "Fun" + id;
+			return (id != null ? id : "") + " " + returnType;
 		}
 		public Token copy() {
 			return new FunDef();

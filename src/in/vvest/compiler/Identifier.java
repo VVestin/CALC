@@ -25,12 +25,13 @@ public class Identifier extends Token {
 
 	public String getAddress() {
 		if (type == Type.INTEGER) {
-			return "IntVar+" + 3 * (id.CharAt(0) - 'A');
+			return "IntVar+" + 3 * (id.charAt(0) - 'A');
 		} else if (type == Type.STRING) {
-			return "StrVar+" + 2 * (id.CharAt(3) - '0');
+			return "StrVar+" + 2 * (id.charAt(3) - '0');
 		} else if (type == Type.LIST) {
-			return "listVar+" + 2 * (id.CharAt(1) - '0');
+			return "listVar+" + 2 * (id.charAt(1) - '0');
 		}
+		return "Compile Error. Tried to get address of nonaddressable identifier";
 	}
 
 	public boolean isCompileable() {

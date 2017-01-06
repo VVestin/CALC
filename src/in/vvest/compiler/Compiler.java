@@ -55,6 +55,7 @@ public class Compiler {
 		tokenID.put("dim(", new Function("Dimension", 1, Type.INTEGER));
 		tokenID.put("augment(", new Function("Augment", 2, Type.LIST));
 		tokenID.put("pop(", new Function.Pop());
+		tokenID.put("Return(", new Function.Return()); // TODO make this a control structure.
 		tokenID.put("If(", new ControlStructure.If());
 		tokenID.put("Else", new ControlStructure.Else());
 		tokenID.put("ElseIf(", new ControlStructure.ElseIf());
@@ -96,7 +97,6 @@ public class Compiler {
 	public void compile(String src) {
 		System.out.println(src.replace(":", "\n"));
 		List<Token> tokens = lex.tokenize(src);
-		System.out.println(tokens);
 		Token prgm = parser.parse(tokens);
 		prgm.print();
 		try {
@@ -118,7 +118,6 @@ public class Compiler {
 		for (String statement : code) {
 			System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") || statement.startsWith(";") ? "" : "\t") + statement);
 		}
-		System.exit(0);
 		// Include lib.z80 at the bottom
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader("res/lib.z80"));

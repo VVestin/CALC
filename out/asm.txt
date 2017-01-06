@@ -4,10 +4,47 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
+	ld a,$02
+	ld de,$0000
+	call PushIntLiteral
+	ld a,$01
+	ld de,$0000
+	call PushIntLiteral
+	call DefFunFOO
+	ld a,$01
+	ld de,$0000
+	call PushIntLiteral
+	ld a,$02
+	ld de,$0000
+	call PushIntLiteral
+	call DefFunFOO
+	call Pause
 	call Stop
 	
 String1:
-.db 11,"This is foo"
+.db 1," "
+DefFunFOO:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+0
+	call StoIntVar
+	ld de,IntVar+3
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+0
+	call LoadIntVar
+	call num2Str
+	ld hl,String1
+	call PushStringLiteral
+	call Concat
+	ld de,IntVar+3
+	call LoadIntVar
+	call num2Str
+	call Concat
+	call Disp
+FunReturnFOO:
+	ret
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work
@@ -570,9 +607,9 @@ LFSRSeed:
 	;.module Mult
 	; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
 Mult:
-	ld hl,MultResult
 	call FreeIntArg0
 	call FreeIntArg1
+	ld hl,MultResult
 	ld (hl),$0
 	inc hl
 	ld (hl),$0
@@ -1415,10 +1452,10 @@ StrVar:
 ListVar:
 .ds $0B, $0
 	
+FuncTemp:
+.dw $00
 InitStack:
 .dw $00
-TempPtr:
-	; TODO remove this
 FreePtr:
 .dw Heap
 	

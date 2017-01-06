@@ -27,10 +27,10 @@ public class Parser {
 		funCalls = new LinkedList<Function.FunCall>();
 		boolean newLine = false;
 		boolean endLine = false;
+		String identString = "";
 		Token last = null;
 		while (it.hasNext()) {
 			Token next = it.next();
-			System.out.println("next " + next);
 			if (next instanceof Colon) {
 				newLine = true;
 				endLine = false;
@@ -41,6 +41,13 @@ public class Parser {
 			} else if (endLine) { 
 				System.err.println("Parse Error. Instructions must be on their own lines");
 			} else if (next instanceof Identifier || next instanceof Literal) {
+				if (next instanceof Identifier && next.getType() == Type.INTEGER) {
+					if (last instanceof Identifier && ((Identifier) last).getType() == Type.INTEGER) {
+						identString += ((Identifier) next).getValue();
+					} else {
+						identString = ((Identifier) next).getValue();
+					}
+				}
 				rpn.push(next);
 			} else if (next instanceof Operator) {
 				while (!operatorStack.isEmpty() && !((Operator) next).isHigherPriority(operatorStack.peek())) {
@@ -61,11 +68,9 @@ public class Parser {
 				funTable.put(fun, (ControlStructure.FunDef) next);
 			} else if (next instanceof Parenthesis && ((Parenthesis) next).isOpen()) {
 				if (last != null & last instanceof Identifier && ((Identifier) last).getType() == Type.INTEGER) {
-					String fun = "";
-					while (!rpn.isEmpty() && rpn.peek() instanceof Identifier && ((Identifier) rpn.peek()).getType() == Type.INTEGER) {
-						fun = ((Identifier) rpn.pop()).getIdentifier() + fun;
-					}
-					Function.FunCall funCall = new Function.FunCall(fun);
+					for (int i = 0; i < identString.length(); i++)
+						rpn.pop();
+					Function.FunCall funCall = new Function.FunCall(identString);
 					operatorStack.push(funCall);
 					markedTokens.add(funCall);
 					rpn.push(funCall);
@@ -150,6 +155,9 @@ public class Parser {
 			if (!funTable.keySet().contains(fun.getID())) System.err.println("Parse Error. Function " + fun.getID() + " has not been defined");
 			fun.setFun(funTable.get(fun.getID()));
 		}
+		for (String id : funTable.keySet()) {
+			funTable.get(id).checkReturnType();
+		}
 		Token prgm = new Block();
 		while (!rpn.isEmpty()) {
 			prgm.getChildren().add(rpn.pop());
@@ -183,7 +191,6 @@ public class Parser {
 			markedTokens.remove(rpn.peek());
 			rpn.pop();
 		} else if (operator instanceof ControlStructure.Else || operator instanceof ControlStructure.ElseIf) {
-			System.out.println("DEBUG " + operator);
 			Block block = new Block();
 			while (!markedTokens.contains(rpn.peek())) {
 				block.getChildren().add(rpn.pop());

@@ -126,7 +126,10 @@ public class Function extends Token {
 			this.id = id;
 		}
 		public void compile(List<String> code) {
-			
+			for (Token t : children) {
+				t.compile(code);
+			}
+			code.add("call " + fun.getAddress());				
 		}
 		public Type getType() {
 			return fun.getType();
@@ -142,6 +145,29 @@ public class Function extends Token {
 		}
 		public Token copy() {
 			return new FunCall();
+		}
+	}
+
+	public static class Return extends Function {
+		private String id;
+		public Return() {
+			super("Return", 1, Type.VOID);
+		}
+		public void compile(List<String> code) {
+			if (children.size() == 1)
+				children.get(0).compile(code);
+			code.add("jp FunReturn" + id); 
+		}
+		public void setID(String id) {
+			this.id = id;
+		}
+		public Type getType() {
+			if (children.size() == 0) 
+				return Type.VOID;
+			return children.get(0).getType();
+		}
+		public Token copy() {
+			return new Return();
 		}
 	}
 }

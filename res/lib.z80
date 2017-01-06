@@ -560,9 +560,9 @@ LFSRSeed:
 ;.module Mult
 ; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
 Mult:
-ld hl,MultResult
 call FreeIntArg0
 call FreeIntArg1
+ld hl,MultResult
 ld (hl),$0
 inc hl
 ld (hl),$0
@@ -1405,10 +1405,10 @@ StrVar:
 ListVar:
 .ds $0B, $0
 
+FuncTemp:
+.dw $00
 InitStack:
 .dw $00
-TempPtr:
-; TODO remove this
 FreePtr:
 .dw Heap
 

@@ -1,7 +1,6 @@
-Fun FOO(X,Y)
-Disp("This is foo")
-Pause
-ClrHome
+Fun FOO(A,B)
+Disp(A+" "+B)
 End
-
-FOO(30,45)
+FOO(1,2)
+FOO(2,1)
+Pause
