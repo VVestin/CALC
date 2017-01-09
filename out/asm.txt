@@ -4,26 +4,53 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
+	ld a,$1E
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+0
+	call StoIntVar
+	ld a,$28
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+3
+	call StoIntVar
+	call FunFOOPre
 	ld a,$02
 	ld de,$0000
 	call PushIntLiteral
 	ld a,$01
 	ld de,$0000
 	call PushIntLiteral
-	call DefFunFOO
+	call FunFOO
+	call FunFOOPre
 	ld a,$01
 	ld de,$0000
 	call PushIntLiteral
 	ld a,$02
 	ld de,$0000
 	call PushIntLiteral
-	call DefFunFOO
+	call FunFOO
+	ld de,IntVar+3
+	call LoadIntVar
+	ld de,IntVar+0
+	call LoadIntVar
+	call DispNum
+	call DispNum
 	call Pause
 	call Stop
 	
-String1:
+String2:
 .db 1," "
-DefFunFOO:
+FunFOOPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+0
+	call LoadIntVar
+	ld de,IntVar+3
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunFOO:
 	pop hl
 	ld (FuncTemp),hl
 	ld de,IntVar+0
@@ -35,7 +62,7 @@ DefFunFOO:
 	ld de,IntVar+0
 	call LoadIntVar
 	call num2Str
-	ld hl,String1
+	ld hl,String2
 	call PushStringLiteral
 	call Concat
 	ld de,IntVar+3
@@ -44,7 +71,14 @@ DefFunFOO:
 	call Concat
 	call Disp
 FunReturnFOO:
-	ret
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+3
+	call StoIntVar
+	ld de,IntVar+0
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work
@@ -1453,6 +1487,8 @@ ListVar:
 .ds $0B, $0
 	
 FuncTemp:
+.dw $00
+FuncRet:
 .dw $00
 InitStack:
 .dw $00

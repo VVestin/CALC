@@ -1,4 +1,3 @@
-_1.5->a
-2/5->b
-Disp(a)
-Disp(a*b*(3/2))
+Func BAR()
+Disp("bar")
+End

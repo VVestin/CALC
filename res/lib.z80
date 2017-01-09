@@ -1407,6 +1407,8 @@ ListVar:
 
 FuncTemp:
 .dw $00
+FuncRet:
+.dw $00
 InitStack:
 .dw $00
 FreePtr:

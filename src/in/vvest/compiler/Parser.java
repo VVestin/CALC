@@ -8,6 +8,9 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 public class Parser {
 	private Stack<Token> operatorStack;
@@ -16,8 +19,10 @@ public class Parser {
 	private List<Token> markedTokens;
 	private Map<String, ControlStructure.FunDef> funTable;
 	private List<Function.FunCall> funCalls;
+	private List<Token> src;
 
 	public Token parse(List<Token> src) {
+		this.src = src;
 		operatorStack = new Stack<Token>();
 		operatorStack.push(new Colon());
 		rpn = new Stack<Token>();
@@ -37,6 +42,7 @@ public class Parser {
 				while (!(operatorStack.peek() instanceof Colon)) {
 					pushOperator(operatorStack.pop());
 				}
+				last = next;
 				continue;
 			} else if (endLine) { 
 				System.err.println("Parse Error. Instructions must be on their own lines");
@@ -207,6 +213,23 @@ public class Parser {
 			markedTokens.remove(rpn.peek());
 			rpn.pop();
 		} else if (operator instanceof Colon) {
+			return;
+		}
+		if (operator instanceof Function.Include) {
+			try {
+				Lexer lex = new Lexer();
+				String file = operator.getChildren().get(0).getValue();
+				Scanner s = new Scanner(new File("res/" + file.substring(1, file.length() - 1)));
+				String str = "";
+				while (s.hasNextLine()) {
+					str += ":" + s.nextLine();
+				}
+				s.close();
+				for (Token t : lex.tokenize(str))
+					it.add(t);			
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			}
 			return;
 		}
 		rpn.push(operator);

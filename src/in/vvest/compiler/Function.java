@@ -126,6 +126,7 @@ public class Function extends Token {
 			this.id = id;
 		}
 		public void compile(List<String> code) {
+			code.add("call " + fun.getAddress() + "Pre");
 			for (Token t : children) {
 				t.compile(code);
 			}
@@ -168,6 +169,15 @@ public class Function extends Token {
 		}
 		public Token copy() {
 			return new Return();
+		}
+	}
+
+	public static class Include extends Function {
+		public Include() {
+			super("Include", 1, Type.VOID);
+		}
+		public Token copy() {
+			return new Include();
 		}
 	}
 }

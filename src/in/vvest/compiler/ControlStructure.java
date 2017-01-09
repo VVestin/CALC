@@ -26,19 +26,34 @@ public abstract class ControlStructure extends Token {
 			for (Token t : children)
 				t.addData(code);
 			checkReturnType();
-			// push the values held in arg vars on to stack and swap them with passed in values
-			// generate block code
-			// if there is a return load return value into a special location in memory and jump to return code
-			// pop values off stack and restore them into their vars	
-
+			code.add(getAddress() + "Pre:");
+			code.add("pop hl");
+			code.add("ld (FuncTemp),hl");
+			for (int i = 0; i < children.size() - 1; i++) {
+				Identifier var = (Identifier) children.get(i);
+				code.add("ld de," + var.getAddress());
+				if (var.getType() == Type.INTEGER) {
+					code.add("call LoadIntVar");
+				} else if (var.getType() == Type.STRING) {
+					code.add("call LoadStrVar");
+				} else if (var.getType() == Type.LIST) {
+					code.add("call LoadListVar");
+				}
+			}
+			code.add("ld hl,(FuncTemp)");
+			code.add("jp (hl)");
 			code.add(getAddress() + ":");
-			// Make SP point to the beginning of the arguments
 			if (children.size() > 0) {
 				code.add("pop hl");
 				code.add("ld (FuncTemp),hl");
 				for (int i = 0; i < children.size() - 1; i++) {
-					code.add("ld de," + ((Identifier) children.get(i)).getAddress());
-					code.add("call StoIntVar");
+					Identifier var = (Identifier) children.get(i);
+					code.add("ld de," + var.getAddress());
+					if (var.getType() == Type.INTEGER) {
+						code.add("call StoIntVar");
+					} else if (var.getType() == Type.STRING || var.getType() == Type.LIST) {
+						code.add("call StoStrVar");
+					} 
 				}
 				code.add("ld hl,(FuncTemp)");
 				code.add("push hl");
@@ -46,13 +61,26 @@ public abstract class ControlStructure extends Token {
 			children.get(children.size() - 1).compile(code);
 			code.add("FunReturn" + id + ":");
 			if (returnType != Type.VOID) {
-				code.add("pop de");
 				code.add("pop hl");
-				code.add("push de");
-				code.add("jp (hl)");
-			} else {
-				code.add("ret");
+				code.add("ld (FuncRet),hl");
 			}
+			code.add("pop hl");
+			code.add("ld (FuncTemp),hl");
+			for (int i = children.size() - 2; i >= 0; i--) {
+				Identifier var = (Identifier) children.get(i);
+				code.add("ld de," + var.getAddress());
+				if (var.getType() == Type.INTEGER) {
+					code.add("call StoIntVar");
+				} else if (var.getType() == Type.STRING || var.getType() == Type.LIST) {
+					code.add("call StoStrVar");
+				} 
+			}
+			if (returnType != Type.VOID) {
+				code.add("ld hl,(FuncRet)");
+				code.add("push hl");
+			}
+			code.add("ld hl,(FuncTemp)");
+			code.add("jp (hl)");
 		}
 		public void setID(String id) {
 			this.id = id;
@@ -81,7 +109,7 @@ public abstract class ControlStructure extends Token {
 			}
 		}
 		public String getAddress() {
-			return "DefFun" + id;
+			return "Fun" + id;
 		}
 		public Type getType() {
 			return returnType;

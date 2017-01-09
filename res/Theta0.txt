@@ -1,6 +1,10 @@
+Include("Theta4.txt")
 Fun FOO(A,B)
 Disp(A+" "+B)
 End
+30->A
+40->B
 FOO(1,2)
 FOO(2,1)
+Disp(A,B)
 Pause
