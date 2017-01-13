@@ -4,81 +4,23 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
-	ld a,$1E
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+0
+RepeatLoop1:
+	call GetKey
+	ld de,IntVar+30
 	call StoIntVar
-	ld a,$28
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+3
-	call StoIntVar
-	call FunFOOPre
-	ld a,$02
-	ld de,$0000
-	call PushIntLiteral
-	ld a,$01
-	ld de,$0000
-	call PushIntLiteral
-	call FunFOO
-	call FunFOOPre
-	ld a,$01
-	ld de,$0000
-	call PushIntLiteral
-	ld a,$02
-	ld de,$0000
-	call PushIntLiteral
-	call FunFOO
-	ld de,IntVar+3
-	call LoadIntVar
-	ld de,IntVar+0
+	ld de,IntVar+30
 	call LoadIntVar
 	call DispNum
-	call DispNum
-	call Pause
+	ld de,IntVar+30
+	call LoadIntVar
+	ld a,$09
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld hl,RepeatLoop1
+	call If
 	call Stop
 	
-String2:
-.db 1," "
-FunFOOPre:
-	pop hl
-	ld (FuncTemp),hl
-	ld de,IntVar+0
-	call LoadIntVar
-	ld de,IntVar+3
-	call LoadIntVar
-	ld hl,(FuncTemp)
-	jp (hl)
-FunFOO:
-	pop hl
-	ld (FuncTemp),hl
-	ld de,IntVar+0
-	call StoIntVar
-	ld de,IntVar+3
-	call StoIntVar
-	ld hl,(FuncTemp)
-	push hl
-	ld de,IntVar+0
-	call LoadIntVar
-	call num2Str
-	ld hl,String2
-	call PushStringLiteral
-	call Concat
-	ld de,IntVar+3
-	call LoadIntVar
-	call num2Str
-	call Concat
-	call Disp
-FunReturnFOO:
-	pop hl
-	ld (FuncTemp),hl
-	ld de,IntVar+3
-	call StoIntVar
-	ld de,IntVar+0
-	call StoIntVar
-	ld hl,(FuncTemp)
-	jp (hl)
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work

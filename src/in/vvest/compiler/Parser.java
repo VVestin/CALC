@@ -1,5 +1,6 @@
 package in.vvest.compiler;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -225,8 +226,13 @@ public class Parser {
 					str += ":" + s.nextLine();
 				}
 				s.close();
-				for (Token t : lex.tokenize(str))
+				List<Token> tokens = lex.tokenize(str);
+				Collections.reverse(tokens);
+				it.next();
+				for (Token t : tokens) {
+					it.previous();
 					it.add(t);			
+				}
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}

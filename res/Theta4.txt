@@ -1,3 +1,5 @@
-Func BAR()
-Disp("bar")
-End
+Disp($A)
+Disp($1E)
+Disp($12C)
+Disp($FFFF)
+Pause

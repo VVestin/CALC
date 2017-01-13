@@ -62,7 +62,7 @@ public class Lexer {
 	}
 
 	public List<Token> tokenize(String src) {
-		System.out.println("Parsing \n" + src);
+		System.out.println("Lexing \n" + src);
 		List<Token> tokens = new LinkedList<Token>();
 		String unrecognized = "";
 		while (src.length() > 0) {
@@ -74,7 +74,7 @@ public class Lexer {
 			}
 			if (tokenIdentifiers.containsKey(id)) {
 				if (unrecognized.length() > 0)
-					System.err.println("Parse Error. Unrecognized Token " + unrecognized);
+					System.err.println("Syntax Error. Unrecognized Token " + unrecognized);
 				unrecognized = "";
 				tokens.add(tokenIdentifiers.get(id).copy());
 				src = src.substring(id.length());
@@ -94,18 +94,19 @@ public class Lexer {
 				if (commentEnd == -1)
 					break;
 				src = src.substring(commentEnd);
-			} else if (src.startsWith(".") || isNum(src.charAt(0))) {
+			} else if (src.startsWith(".") || isNum(src.charAt(0)) || src.startsWith("$")) {
 				boolean decimal = false;
 				boolean number = false;
 				int index = 0;
-				while (index < src.length() && (src.charAt(index) == '.' || isNum(src.charAt(index)))) {
+				while (index < src.length() && (src.charAt(index) == '.' || isNum(src.charAt(index)) || (index == 0 && src.charAt(0) == '$'))) {
+					System.out.println(index);
 					if (src.charAt(index) == '.') {
 						if (decimal)
 							// TODO add line numbers to exceptions
 							throw new RuntimeException(
 									"Lexical Analysis failed. Multiple decimal points in a Number Literal: ");
 						decimal = true;
-					} else {
+					} else if (isNum(src.charAt(0))) {
 						number = true;
 					}
 					index++;
@@ -136,7 +137,7 @@ public class Lexer {
 	}
 
 	private static boolean isNum(char c) {
-		return c >= 48 && c <= 57; // Will also work on calc because TI-83 uses
+		return c >= '0' && c <= '9' || c >= 'A' && c <= 'F'; // Will also work on calc because TI-83 uses
 		// mostly standard ASCII
 	}
 

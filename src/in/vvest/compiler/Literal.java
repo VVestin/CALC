@@ -21,22 +21,30 @@ public class Literal extends Token {
 
 	public void compile(List<String> code) {
 		if (type == Type.INTEGER) {
-			int number = 0;
-			for (int i = 0; i < value.length(); i++) {
-				number *= 10;
-				number += value.charAt(i) - 48;
+			if (value.charAt(0) == '$') {
+				String hex = value.substring(1);
+				if (hex.length() == 1) { 
+					code.add("ld a,$" + hex.charAt(hex.length()));
+				} else {
+					code.add("ld a,$" + hex.substring(hex.length()
+			} else {
+				int number = 0;
+				for (int i = 0; i < value.length(); i++) {
+					number *= 10;
+					number += value.charAt(i) - 48;
+				}
+				String[] hex = new String[6];
+				for (int i = 0; i < hex.length; i++)
+					hex[i] = "0";
+				int digit = 0;
+				while (number > 0) {
+					hex[digit] = HEXITS[number % 16];
+					number /= 16;
+					digit++;
+				}
+				code.add("ld a,$" + hex[1] + hex[0]);
+				code.add("ld de,$" + hex[3] + hex[2] + hex[5] + hex[4]);
 			}
-			String[] hex = new String[6];
-			for (int i = 0; i < hex.length; i++)
-				hex[i] = "0";
-			int digit = 0;
-			while (number > 0) {
-				hex[digit] = HEXITS[number % 16];
-				number /= 16;
-				digit++;
-			}
-			code.add("ld a,$" + hex[1] + hex[0]);
-			code.add("ld de,$" + hex[3] + hex[2] + hex[5] + hex[4]);
 			code.add("call PushIntLiteral");
 		} else if (type == Type.STRING) {
 			code.add("ld hl," + dataLabel);

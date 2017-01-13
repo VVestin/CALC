@@ -1,10 +1,28 @@
-Include("Theta4.txt")
-Fun FOO(A,B)
-Disp(A+" "+B)
+Fun MOVE(K)
+If(K<5)
+Output(Y,2*X-1," ")
+X+(K=3)*(X<8)-(K=2)*(X>1)->X
+Y+(K=1)*(Y<8)-(K=4)*(Y>1)->Y
 End
-30->A
-40->B
-FOO(1,2)
-FOO(2,1)
-Disp(A,B)
-Pause
+Output(Y,2*X-1,">")
+End
+4->X
+4->Y
+MOVE(0)
+{4}->L1
+For(A,1,63)
+augment(L1,{0})->L1
+End
+Disp(dim(L1))
+Disp(L1[1])
+Repeat(K=15)
+Repeat(K)
+getKey->K
+End
+If(K<5)
+Output(Y,2*X-1," ")
+X+(K=3)*(X<8)-(K=2)*(X>1)->X
+Y+(K=1)*(Y<8)-(K=4)*(Y>1)->Y
+End
+Output(Y,2*X-1,">")
+End

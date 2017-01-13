@@ -1,4 +1,11 @@
-": + *"->Str1
+Fun LEFT(S,T,H)
+For(Y,T,H)
+Output(Y,S,Str1)
+End
+Return(S+1)
+End
+
+"*"->Str1
 12->W
 8->H
 1->S
@@ -16,10 +23,10 @@ For(X,S,W)
 Output(H,X,Str1)
 End
 H-1->H
-For(Y,T,H)
-Output(Y,S,Str1)
-End
-S+1->S
-Disp({1,2,3})
+?For(Y,T,H)
+?Output(Y,S,Str1)
+?End
+?S+1->S
+LEFT(S,T,H)->S
 Pause
 End

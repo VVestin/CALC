@@ -178,7 +178,7 @@ public class Compiler {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		Compiler c = new Compiler();
-		c.compile(new File("res/Theta0.txt"));
+		c.compile(new File("res/" + args[0] + ".txt"));
 	}
 
 }
