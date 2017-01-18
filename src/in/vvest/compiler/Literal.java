@@ -23,10 +23,16 @@ public class Literal extends Token {
 		if (type == Type.INTEGER) {
 			if (value.charAt(0) == '$') {
 				String hex = value.substring(1);
-				if (hex.length() == 1) { 
-					code.add("ld a,$" + hex.charAt(hex.length()));
+				if (hex.length() <= 2) { 
+					code.add("ld a,$" + hex);
+					code.add("ld de,$00");
+				} else if (hex.length() <= 4) {
+					code.add("ld a,$" + hex.substring(hex.length() - 2));
+					code.add("ld de,$" + hex.substring(0, hex.length() - 2) + "00");
 				} else {
-					code.add("ld a,$" + hex.substring(hex.length()
+					code.add("ld a,$" + hex.substring(hex.length() - 2));
+					code.add("ld de,$" + hex.substring(hex.length() - 4, hex.length() - 2) + (hex.length() == 6 ? hex.substring(0, 2) : "0" + hex.substring(0,1)));
+				}
 			} else {
 				int number = 0;
 				for (int i = 0; i < value.length(); i++) {

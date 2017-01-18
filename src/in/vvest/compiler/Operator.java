@@ -6,13 +6,17 @@ public class Operator extends Token {
 
 	private int precedence; // Higher = tighter
 	// 0  ->
-	// 1  Or, Xor
+	// 1  Or
 	// 2  And
-	// 3  =, =/=
-	// 4  <, >, <=, >=
-	// 5  +, -
-	// 6  *, /, %
-	// 7  _ (negative)
+	// 3  &
+	// 4  ^
+	// 5  |
+	// 6  =, =/=
+	// 7  <, >, <=, >=
+	// 8  >>, <<
+	// 9  +, -
+	// 10  *, /, %
+	// 11 _ (negative)
 
 	private Operator(int precedence) {
 		super();
@@ -79,7 +83,7 @@ public class Operator extends Token {
 
 	public static class Negative extends Operator {
 		public Negative() {
-			super(7);
+			super(11);
 		}
 
 		public void compile(List<String> code) {
@@ -94,7 +98,7 @@ public class Operator extends Token {
 
 	public static class Add extends Operator {
 		public Add() {
-			super(5);
+			super(8);
 		}		
 		public void compile(List<String> code) {
 			if (children.get(0).getType() == Type.STRING && children.get(1).getType() == Type.STRING) {
@@ -129,7 +133,7 @@ public class Operator extends Token {
 
 	public static class Subtract extends Operator {
 		public Subtract() {
-			super(5);
+			super(8);
 		}	
 
 		public void compile(List<String> code) {
@@ -145,7 +149,7 @@ public class Operator extends Token {
 
 	public static class Multiply extends Operator {
 		public Multiply() {
-			super(6);
+			super(10);
 		}	
 
 		public void compile(List<String> code) {
@@ -160,7 +164,7 @@ public class Operator extends Token {
 
 	public static class Divide extends Operator {
 		public Divide() {
-			super(6);
+			super(10);
 		}	
 
 		public void compile(List<String> code) {
@@ -175,7 +179,7 @@ public class Operator extends Token {
 	
 	public static class Modulo extends Operator {
 		public Modulo() {
-			super(6);
+			super(10);
 		}	
 
 		public void compile(List<String> code) {
@@ -192,7 +196,7 @@ public class Operator extends Token {
 
 		private boolean not;
 		public Equal(boolean not) {
-			super(3);
+			super(6);
 			this.not = not;
 		}
 
@@ -216,7 +220,7 @@ public class Operator extends Token {
 		private boolean less, equal;
 
 		public Compare(boolean less, boolean equal) {
-			super(4);
+			super(7);
 			this.less = less;
 			this.equal = equal;
 		}
@@ -268,20 +272,67 @@ public class Operator extends Token {
 			return new OR();
 		}
 	}
-
-	public static class XOR extends Operator {
-		public XOR() {
-			super(1);
+	public static class BitAND extends Operator {
+		public BitAND() {
+			super(3);
 		}	
 
 		public void compile(List<String> code) {
 			super.compile(code);
-			code.add("call XOr");
+			code.add("call BitAnd");
 		}
 
 		public Token copy() {
-			return new XOR();
+			return new BitAND();
 		}
 	}
 
+	public static class BitOR extends Operator {
+		public BitOR() {
+			super(5);
+		}	
+
+		public void compile(List<String> code) {
+			super.compile(code);
+			code.add("call BitOr");
+		}
+
+		public Token copy() {
+			return new BitOR();
+		}
+	}
+	
+	public static class BitXOR extends Operator {
+		public BitXOR() {
+			super(4);
+		}	
+
+		public void compile(List<String> code) {
+			super.compile(code);
+			code.add("call BitXOr");
+		}
+
+		public Token copy() {
+			return new BitXOR();
+		}
+	}
+
+	public static class BitShift extends Operator {
+		private boolean left;
+
+		public BitShift(boolean left) {
+			super(9);
+			this.left = left;
+		}
+		
+		public void compile(List<String> code) {
+			children.get(0).compile(code);
+			code.add("ld b," + ((Literal) children.get(1)).getValue());
+			code.add("call Shift" + (left ? "Left" : "Right"));
+		}
+
+		public Token copy() {
+			return new BitShift(left);
+		}
+	}
 }

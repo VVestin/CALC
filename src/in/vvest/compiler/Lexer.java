@@ -25,7 +25,11 @@ public class Lexer {
 		tokenID.put("=/=", new Operator.Equal(true));
 		tokenID.put(" and ", new Operator.AND());
 		tokenID.put(" or ", new Operator.OR());
-		tokenID.put(" xor ", new Operator.XOR());
+		tokenID.put("&", new Operator.BitAND());
+		tokenID.put("|", new Operator.BitOR());
+		tokenID.put("^", new Operator.BitXOR());
+		tokenID.put("<<", new Operator.BitShift(true));
+		tokenID.put(">>", new Operator.BitShift(false));
 		tokenID.put("->", new Operator.Store());
 		tokenID.put("Disp(", new Function.Disp());
 		tokenID.put("Output(", new Function.Output());
@@ -98,15 +102,14 @@ public class Lexer {
 				boolean decimal = false;
 				boolean number = false;
 				int index = 0;
-				while (index < src.length() && (src.charAt(index) == '.' || isNum(src.charAt(index)) || (index == 0 && src.charAt(0) == '$'))) {
-					System.out.println(index);
+				while (index < src.length() && (src.charAt(index) == '.' || isNum(src.charAt(index)) || (index == 0 && src.startsWith("$")))) {
 					if (src.charAt(index) == '.') {
 						if (decimal)
 							// TODO add line numbers to exceptions
 							throw new RuntimeException(
 									"Lexical Analysis failed. Multiple decimal points in a Number Literal: ");
 						decimal = true;
-					} else if (isNum(src.charAt(0))) {
+					} else if (isNum(src.charAt(index))) {
 						number = true;
 					}
 					index++;

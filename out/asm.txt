@@ -4,21 +4,13 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
-RepeatLoop1:
-	call GetKey
-	ld de,IntVar+30
-	call StoIntVar
-	ld de,IntVar+30
-	call LoadIntVar
-	call DispNum
-	ld de,IntVar+30
-	call LoadIntVar
-	ld a,$09
+	ld a,$05
 	ld de,$0000
 	call PushIntLiteral
-	call Equals
-	ld hl,RepeatLoop1
-	call If
+	ld b,1
+	call ShiftRight
+	call DispNum
+	call Pause
 	call Stop
 	
 	;.module Setup
@@ -756,6 +748,114 @@ _AddStoreResultLoop:
 	dec de
 	push de
 	jp (hl)
+	
+	;.module BitAnd
+	; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
+BitAnd:
+	call FreeIntArg0
+	pop bc
+	pop de
+	push de
+	ld hl,IntArg0
+	ld a,(de)
+	and (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	and (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	and (hl)
+	ld (de),a
+	push bc
+	ret
+	
+	;.module ShiftRight
+	; Shifts the number on top of the stack by b bits to the right bringing in zeroes
+ShiftRight:
+	pop de
+	pop hl
+_ShiftRightLoop:
+	inc hl
+	inc hl
+	srl (hl)
+	dec hl
+	rr (hl)
+	dec hl
+	rr (hl)
+	djnz _ShiftRightLoop
+	ex de,hl
+	push de
+	jp (hl)
+	
+	;.module ShiftLeft
+	; Shifts the number on top of the stack by b bits to the left bringing in zeroes
+ShiftLeft:
+	pop de
+	pop hl
+_ShiftLeftLoop:
+	sla (hl)
+	inc hl
+	rl (hl)
+	inc hl
+	rl (hl)
+	dec hl
+	dec hl
+	djnz _ShiftLeftLoop
+	ex de,hl
+	push de
+	jp (hl)
+	
+	;.module BitOr
+	; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
+BitOr:
+	call FreeIntArg0
+	pop bc
+	pop de
+	push de
+	ld hl,IntArg0
+	ld a,(de)
+	or (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	or (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	or (hl)
+	ld (de),a
+	push bc
+	ret
+	
+	;.module BitXor
+	; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
+BitXor:
+	call FreeIntArg0
+	pop bc
+	pop de
+	push de
+	ld hl,IntArg0
+	ld a,(de)
+	xor (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	xor (hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(de)
+	xor (hl)
+	ld (de),a
+	push bc
+	ret
 	
 	;.module ListGet
 	; Gets the element at the index on the top of the list from the list
