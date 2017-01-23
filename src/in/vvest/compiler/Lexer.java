@@ -51,6 +51,7 @@ public class Lexer {
 		tokenID.put("End", new ControlStructure.End());
 		tokenID.put("rand", new Literal.Rand());
 		tokenID.put("getKey", new Literal.GetKey());
+		tokenID.put("getTime", new Literal.GetTime());
 		tokenID.put(":", new Colon());
 		tokenID.put(",", new Comma());
 		tokenID.put("(", new Parenthesis(true));
@@ -98,7 +99,7 @@ public class Lexer {
 				if (commentEnd == -1)
 					break;
 				src = src.substring(commentEnd);
-			} else if (src.startsWith(".") || isNum(src.charAt(0)) || src.startsWith("$")) {
+			} else if (src.startsWith(".") || isDigit(src.charAt(0)) || src.startsWith("$")) {
 				boolean decimal = false;
 				boolean number = false;
 				int index = 0;
@@ -144,12 +145,11 @@ public class Lexer {
 		// mostly standard ASCII
 	}
 
+	private static boolean isDigit(char c) {
+		return c >= '0' && c <= '9';
+	}
+
 	private static boolean isUpperCaseLetter(char c) {
 		return c >= 65 && c <= 90;
 	}
-
-	private static boolean isLowerCaseLetter(char c) {
-		return c >= 97 && c <= 122;
-	}
-
 }

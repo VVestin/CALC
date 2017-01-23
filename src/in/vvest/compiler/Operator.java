@@ -48,8 +48,6 @@ public class Operator extends Token {
 	}
 
 	public static class Store extends Operator {
-		private static int labelIdentifier;
-
 		public Store() {
 			super(0);
 		}

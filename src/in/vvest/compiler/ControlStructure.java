@@ -192,7 +192,7 @@ public abstract class ControlStructure extends Token {
 		public void compile(List<String> code) {
 			if (children.size() < 2) System.err.println("Compile Error. If must have at least 2 children.");
 			if (children.get(0).getType() != Type.INTEGER) System.err.println("Compile Error. If must have an integer condition");
-			String label = "If" + ifLabel;
+			String label = "If" + ++ifLabel;
 			String endLabel = "IfEnd" + ifLabel;
 			children.get(0).compile(code);
 			code.add("ld hl," + label);

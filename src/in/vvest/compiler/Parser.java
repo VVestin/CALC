@@ -1,17 +1,15 @@
 package in.vvest.compiler;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Scanner;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.Stack;
 
 public class Parser {
 	private Stack<Token> operatorStack;
@@ -20,10 +18,8 @@ public class Parser {
 	private List<Token> markedTokens;
 	private Map<String, ControlStructure.FunDef> funTable;
 	private List<Function.FunCall> funCalls;
-	private List<Token> src;
 
 	public Token parse(List<Token> src) {
-		this.src = src;
 		operatorStack = new Stack<Token>();
 		operatorStack.push(new Colon());
 		rpn = new Stack<Token>();

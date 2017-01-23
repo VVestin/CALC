@@ -1,7 +1,6 @@
 package in.vvest.compiler;
 
 import java.util.List;
-import java.util.Arrays;
 
 public class Literal extends Token {
 	private static final String[] HEXITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F"}; // Hex digits
@@ -23,23 +22,17 @@ public class Literal extends Token {
 		if (type == Type.INTEGER) {
 			if (value.charAt(0) == '$') {
 				String hex = value.substring(1);
-				if (hex.length() <= 2) { 
-					code.add("ld a,$" + hex);
-					code.add("ld de,$00");
-				} else if (hex.length() <= 4) {
-					code.add("ld a,$" + hex.substring(hex.length() - 2));
-					code.add("ld de,$" + hex.substring(0, hex.length() - 2) + "00");
-				} else {
-					code.add("ld a,$" + hex.substring(hex.length() - 2));
-					code.add("ld de,$" + hex.substring(hex.length() - 4, hex.length() - 2) + (hex.length() == 6 ? hex.substring(0, 2) : "0" + hex.substring(0,1)));
-				}
+				for (int i = hex.length(); i < 8; i++)
+					hex = "0" + hex;
+				code.add("ld bc,$" + hex.substring(6) + hex.substring(4, 6));
+				code.add("ld de,$" + hex.substring(2, 4) + hex.substring(0, 2));
 			} else {
 				int number = 0;
 				for (int i = 0; i < value.length(); i++) {
 					number *= 10;
 					number += value.charAt(i) - 48;
 				}
-				String[] hex = new String[6];
+				String[] hex = new String[8];
 				for (int i = 0; i < hex.length; i++)
 					hex[i] = "0";
 				int digit = 0;
@@ -48,8 +41,8 @@ public class Literal extends Token {
 					number /= 16;
 					digit++;
 				}
-				code.add("ld a,$" + hex[1] + hex[0]);
-				code.add("ld de,$" + hex[3] + hex[2] + hex[5] + hex[4]);
+				code.add("ld bc,$" + hex[1] + hex[0] + hex[3] + hex[2]);
+				code.add("ld de,$" + hex[5] + hex[4] + hex[7] + hex[6]);
 			}
 			code.add("call PushIntLiteral");
 		} else if (type == Type.STRING) {
@@ -59,7 +52,7 @@ public class Literal extends Token {
 			for (int i = children.size() - 1; i >= 0; i--) {
 				children.get(i).compile(code);
 			}
-			code.add("ld b," + children.size());
+			code.add("ld a," + children.size());
 			code.add("call PushListLiteral");
 		}
 	}
@@ -98,6 +91,15 @@ public class Literal extends Token {
 		}
 		public void compile(List<String> code) {
 			code.add("call GetKey");
+		}
+	}
+
+	public static class GetTime extends Literal {
+		public GetTime() {
+			super(Type.INTEGER, "GetTime");
+		}
+		public void compile(List<String> code) {
+			code.add("call GetTime");
 		}
 	}
 }

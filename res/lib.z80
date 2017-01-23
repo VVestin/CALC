@@ -21,7 +21,7 @@ push de
 push bc
 push hl
 ld de,IntArg0
-ld b,3
+ld b,4
 _FreeIntArg0Loop:
 ld a,(hl)
 ld (de),a
@@ -41,7 +41,7 @@ push de
 push bc
 push hl
 ld de,IntArg1
-ld b,3
+ld b,4
 _FreeIntArg1Loop:
 ld a,(hl)
 ld (de),a
@@ -78,12 +78,13 @@ pop bc
 pop hl ; Number to check
 push bc
 xor a ; Zero out a
-ld b,3
+ld b,4
 _IfCheckLoop:
 ld c,(hl)
 inc hl
 or c
 djnz _IfCheckLoop
+dec hl
 dec hl
 dec hl
 dec hl
@@ -120,21 +121,24 @@ push de
 jp (hl)
 
 ;.module PushIntLiteral
-; Pushes the number in a (lsb) and de (msb) 
+; Pushes the number in bc (lsb) and de (msb) 
 PushIntLiteral:
 push de
-push af
-ld c,3
+push bc
+ld c,4
 call Alloc
 pop hl
-pop af
+pop bc
 pop de
-ld (hl),a
+ld (hl),b
+inc hl
+ld (hl),c
 inc hl
 ld (hl),d
 inc hl
 ld (hl),e
 pop de
+dec hl
 dec hl
 dec hl
 push hl
@@ -146,13 +150,13 @@ NewList:
 PushListRetLoc:
 .dw $00
 ;.module PushListLiteral
-; Pushes b integers from the stack onto a new list and leaves the list on the stack
+; Pushes a integers from the stack onto a new list and leaves the list on the stack
 PushListLiteral:
 pop hl
 ld (PushListRetLoc),hl
-ld a,b
-add a,b
-add a,b ; Multiply by 3 because 3 byte integers
+ld b,a
+add a,a
+add a,a ; Multiply a by 4
 inc a ; Add 1 for size byte
 ld c,a
 push bc
@@ -174,7 +178,12 @@ inc de
 inc hl
 ld a,(de)
 ld (hl),a
+inc de
 inc hl
+ld a,(de)
+ld (hl),a
+inc hl
+dec de
 dec de
 dec de
 push bc
@@ -190,7 +199,7 @@ ld hl,(PushListRetLoc)
 jp (hl)
 
 ;.module LoadListVar
-; Locationod StrVar stored in de
+; Location of StrVar stored in de
 LoadListVar:
 ld a,(de)
 ld l,a
@@ -226,14 +235,14 @@ push de
 jp (hl)
 
 ;.module StoIntVar
-; Takes 3 bytes from the number at the top of the stack and moves them to de
+; Takes 4 bytes from the number at the top of the stack and moves them to de
 StoIntVar:
 pop bc
 pop hl
 push bc
 push hl
 ld b,0
-ld c,3
+ld c,4
 ldir
 call Free
 ret
@@ -275,7 +284,7 @@ pop hl
 push hl
 push bc
 ld a,(hl)
-ld b,3
+ld b,4
 scf
 ccf
 _NegateCPLLoop:
@@ -295,8 +304,9 @@ push de
 push hl
 inc de
 inc de
+inc de ; Look at MSB
 ld a,(de)
-bit 7,a
+bit 7,a ; Look at sign bit
 jr z,_AbsValueSkipNegate
 call Negate
 _AbsValueSkipNegate:
@@ -309,13 +319,13 @@ ret
 Compare:
 call FreeIntArg0
 call FreeIntArg1
-ld hl,IntArg0+2
-ld de,IntArg1+2
+ld hl,IntArg0+3
+ld de,IntArg1+3
 jr c, _CompareGreater ; Luckily, carry is spared after FreeIntArg. This is dangerous
-ld de,IntArg0+2
-ld hl,IntArg1+2
+ld de,IntArg0+3
+ld hl,IntArg1+3
 _CompareGreater:
-ld b,3
+ld b,4
 _CompareLoop:
 ld a,(de)
 cp (hl)
@@ -337,13 +347,13 @@ jp _EqualsPushResult
 CompareEqual:
 call FreeIntArg0
 call FreeIntArg1
-ld hl,IntArg0+2
-ld de,IntArg1+2
+ld hl,IntArg0+3
+ld de,IntArg1+3
 jr c, _CompareEqualGreater
-ld de,IntArg0+2
-ld hl,IntArg1+2
+ld de,IntArg0+3
+ld hl,IntArg1+3
 _CompareEqualGreater:
-ld b,3
+ld b,4
 _CompareEqualLoop:
 ld a,(de)
 cp (hl)
@@ -366,7 +376,7 @@ call FreeIntArg0
 call FreeIntArg1
 ld hl,IntArg0
 ld de,IntArg1
-ld b,3
+ld b,4
 _OrLoop:
 ld a,(de)
 or a
@@ -390,7 +400,7 @@ call FreeIntArg0
 call FreeIntArg1
 ld hl,IntArg0
 ld de,IntArg1
-ld b,3
+ld b,4
 _AndLoop1:
 ld a,(de)
 or a
@@ -400,7 +410,7 @@ djnz _AndLoop1
 ld b,0
 jr _EqualsPushResult
 _AndPartTrue:
-ld b,3
+ld b,4
 _AndLoop2:
 ld a,(hl)
 or a
@@ -418,7 +428,7 @@ jr _EqualsPushResult
 Not:
 call FreeIntArg0
 ld hl,IntArg0
-ld b,3
+ld b,4
 _NotLoop:
 ld a,(hl)
 or a
@@ -438,7 +448,7 @@ call FreeIntArg0
 call FreeIntArg1
 ld hl,IntArg0
 ld de,IntArg1
-ld b,3
+ld b,4
 _EqualsLoop:
 ld a,(de)
 cp (hl)
@@ -452,7 +462,7 @@ _EqualsNotEqual:
 ld b,0
 _EqualsPushResult:
 push bc
-ld c,3
+ld c,4
 call Alloc
 pop hl
 pop bc
@@ -463,51 +473,36 @@ inc hl
 ld (hl),0
 inc hl
 ld (hl),0
-ld h,d
-ld l,e
+inc hl
+ld (hl),0
+ex de,hl
 jp (hl)
 
 ;.module Rand
-; Generates a random number between 0 and 16,777,216
+; Generates a random number between 0 and 4,294,967,296 and pushes it onto the stack
 Rand:
-ld c,3
+ld c,4
 call Alloc
 call RandLFSR
 pop hl
-ld (hl),a
 inc hl
+ld (hl),a
 push hl
 call RandLFSR
 pop hl
-ld (hl),a
 inc hl
+ld (hl),a
 push hl
 call RandLFSR
 pop hl
+inc hl
 ld (hl),a
+dec hl
 dec hl
 dec hl
 pop de
 push hl
 ex de,hl
-jp (hl)
-
-;.module GetKey
-; Gets the key currently being pressed and pushes it to the stack
-GetKey:
-ld c,3
-call Alloc
-bcall(_GetCSC)
-pop hl
-push hl
-ld (hl),a
-inc hl
-ld (hl),$0
-inc hl
-ld (hl),$0
-pop de
-pop hl
-push de
 jp (hl)
 
 ;------LFSR------
@@ -557,6 +552,47 @@ ret
 LFSRSeed:
 .db $F1, $11, $EA, $02, $C4, $45, $77, $4A
 
+;.module GetKey
+; Gets the key currently being pressed and pushes it to the stack
+GetKey:
+ld c,4
+call Alloc
+bcall(_GetCSC)
+pop hl
+push hl
+ld (hl),a
+inc hl
+ld (hl),$0
+inc hl
+ld (hl),$0
+inc hl
+ld (hl),$0
+pop de
+pop hl
+push de
+jp (hl)
+
+;.module GetTime:
+; Gets the unix time from system and pushes it onto the stack
+GetTime:
+ld c,4
+call Alloc
+pop de
+pop hl
+push de
+in a,($45)
+ld (de),a
+inc de
+in a,($46)
+ld (de),a
+inc de
+in a,($47)
+ld (de),a
+inc de
+in a,($48)
+ld (de),a
+jp (hl)
+
 ;.module Mult
 ; Multiplies the two numbers at the top of the stack and leaves the stack with only the result
 Mult:
@@ -568,13 +604,15 @@ inc hl
 ld (hl),$0
 inc hl
 ld (hl),$0
-ld b,24
+inc hl
+ld (hl),$0
+ld b,32
 _MultLoop:
 push bc
-ld hl,IntArg1+2
+ld hl,IntArg1+3
 srl (hl)
 dec hl
-ld b,2 ; Shift every remaining byte in IntArg1
+ld b,3 ; Shift every remaining byte in IntArg1
 _MultShiftLoopB:
 rr (hl)
 dec hl
@@ -582,7 +620,7 @@ djnz _MultShiftLoopB
 jr nc,_MultSkipAdd
 ld hl,IntArg0
 ld de,MultResult
-ld b,3
+ld b,4
 xor a
 _MultAddLoop:
 ld a,(de)
@@ -595,7 +633,7 @@ _MultSkipAdd:
 ld hl,IntArg0
 sla (hl)
 inc hl
-ld b,2
+ld b,3
 _MultShiftLoopA:
 rl (hl)
 inc hl
@@ -603,7 +641,9 @@ djnz _MultShiftLoopA
 pop bc
 djnz _MultLoop
 ld hl,MultResult
-ld a,(hl)
+ld b,(hl)
+inc hl
+ld c,(hl)
 inc hl
 ld d,(hl)
 inc hl
@@ -622,9 +662,12 @@ Divide:
 call FreeIntArg1
 call FreeIntArg0
 call Div24by24
-; edc to ade
-ld a,e
-ld e,c
+; edc to bcde
+ld a,c
+ld c,d
+ld d,a
+ld b,e
+ld e,0
 call PushIntLiteral
 pop de
 pop hl
@@ -637,11 +680,12 @@ Modulo:
 call FreeIntArg1
 call FreeIntArg0
 call Div24by24
-; lha to ade
-ld e,a
-ld d,h
-ld a,l
-call PushIntLiteral
+; lha to bcde
+ld e,0
+ld d,a
+ld c,h
+ld b,l
+call pushIntLiteral
 pop de
 pop hl
 push de
@@ -665,7 +709,7 @@ ld h,a
 inc de
 ld a,(de)
 pop de
-ld b,a   ;INPUTS: ahl = dividend cde = divisor
+ld b,a    ;INPUTS: ahl = dividend cde = divisor
 push hl   ;OUTPUTS: cde = quotient ahl = remainder
 pop ix
 ld l,24
@@ -703,58 +747,30 @@ ret
 ; Adds the two numbers at the top of the hardware stack and leaves their sum at the top of the hardware stack.
 Add:
 call FreeIntArg0
-call FreeIntArg1
+pop bc
+pop hl
+push hl
 ld de,IntArg0
-ld hl,IntArg1
-ld	b,3
 scf
 ccf
-_AddLoop:
-ld	a,(de)
+ld a,(de)
 adc a,(hl)
-ld	(de),a
-inc hl
-inc de
-djnz _AddLoop
-ld c,3
-call Alloc
-ld hl,IntArg0
-pop de
-ld b,3
-_AddStoreResultLoop:
-ld a,(hl)
-ld (de),a
-inc hl
-inc de
-djnz _AddStoreResultLoop ; TODO use ldir instead of manually looping
-pop hl
-dec de
-dec de
-dec de
-push de
-jp (hl)
-
-;.module BitAnd
-; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
-BitAnd:
-call FreeIntArg0
-pop bc
-pop de
-push de
-ld hl,IntArg0
-ld a,(de)
-and (hl)
-ld (de),a
+ld (hl),a
 inc hl
 inc de
 ld a,(de)
-and (hl)
-ld (de),a
+adc a,(hl)
+ld (hl),a
 inc hl
 inc de
 ld a,(de)
-and (hl)
-ld (de),a
+adc a,(hl)
+ld (hl),a
+inc hl
+inc de
+ld a,(de)
+adc a,(hl)
+ld (hl),a
 push bc
 ret
 
@@ -766,7 +782,10 @@ pop hl
 _ShiftRightLoop:
 inc hl
 inc hl
+inc hl
 srl (hl)
+dec hl
+rr (hl)
 dec hl
 rr (hl)
 dec hl
@@ -787,6 +806,9 @@ inc hl
 rl (hl)
 inc hl
 rl (hl)
+inc hl
+rl (hl)
+dec hl
 dec hl
 dec hl
 djnz _ShiftLeftLoop
@@ -794,8 +816,37 @@ ex de,hl
 push de
 jp (hl)
 
+;.module BitAnd
+; Pops two numbers off the top of the stack and pushes the bitwise AND of the two numbers
+BitAnd:
+call FreeIntArg0
+pop bc
+pop de
+push de
+ld hl,IntArg0
+ld a,(de)
+and (hl)
+ld (de),a
+inc hl
+inc de
+ld a,(de)
+and (hl)
+ld (de),a
+inc hl
+inc de
+ld a,(de)
+and (hl)
+ld (de),a
+inc hl
+inc de
+ld a,(de)
+and (hl)
+ld (de),a
+push bc
+ret
+
 ;.module BitOr
-; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
+; Pops two numbers off the top of the stack and pushes the bitwise OR of the two numbers
 BitOr:
 call FreeIntArg0
 pop bc
@@ -815,11 +866,16 @@ inc de
 ld a,(de)
 or (hl)
 ld (de),a
+inc hl
+inc de
+ld a,(de)
+or (hl)
+ld (de),a
 push bc
 ret
 
 ;.module BitXor
-; Pops two numbers off the top of the stack and pushes the bitwise and of the two numbers
+; Pops two numbers off the top of the stack and pushes the bitwise XOR of the two numbers
 BitXor:
 call FreeIntArg0
 pop bc
@@ -831,6 +887,12 @@ xor (hl)
 ld (de),a
 inc hl
 inc de
+ld a,(de)
+xor (hl)
+ld (de),a
+inc hl
+inc de
+ld a,(de)
 ld a,(de)
 xor (hl)
 ld (de),a
@@ -852,9 +914,8 @@ pop hl ; The List
 push de
 push bc
 ld a,(de)
-ld b,a
-add a,b
-add a,b
+add a,a
+add a,a
 ld c,a
 ld b,0
 add hl,bc
@@ -869,6 +930,11 @@ inc hl
 inc de
 ld a,(hl)
 ld (de),a
+inc hl
+inc de
+ld a,(hl)
+ld (de),a
+dec hl
 dec hl
 dec hl
 push hl
@@ -885,9 +951,8 @@ pop hl ; The List
 push bc
 push de
 ld a,(de)
-ld b,a
-add a,b
-add a,b
+add a,a
+add a,a
 ld c,a
 ld b,0
 ex de,hl ; Dereference hl
@@ -917,13 +982,17 @@ inc hl
 inc de
 ld a,(de)
 ld (hl),a
+inc hl
+inc de
+ld a,(de)
+ld (hl),a
 call Free ; Free the index
 ret
 
 ;.module Dimension
 ; Frees the list on top of the stack and pushes its size
 Dimension:
-ld c,3
+ld c,4
 call Alloc
 pop de
 pop bc
@@ -934,6 +1003,8 @@ ld a,(hl)
 ld (de),a
 inc de
 ld a,$0
+ld (de),a
+inc de
 ld (de),a
 inc de
 ld (de),a
@@ -950,10 +1021,9 @@ pop hl ; List2
 push bc
 ld a,(de)
 add a,(hl)
-ld c,a
 ld b,a
-add a,c
-add a,c
+add a,a
+add a,a
 ld c,a
 inc c ; Include size bit
 ld a,b ; Actual dimention
@@ -968,11 +1038,9 @@ push de
 ld (de),a
 inc de
 push hl
-ld b,(hl) ; Str1 size
-xor a
-add a,b
-add a,b
-add a,b
+ld a,(hl) ; List1 size
+add a,a
+add a,a
 ld b,a
 _AugmentLoadList1:
 inc hl
@@ -989,11 +1057,9 @@ pop bc
 pop hl
 push bc
 push hl
-ld b,(hl) ; List2 size
-xor a
-add a,b
-add a,b
-add a,b
+ld a,(hl) ; List2 size
+add a,a
+add a,a
 ld b,a
 _AugmentLoadList2:
 inc hl
@@ -1014,9 +1080,8 @@ Pop:
 ld a,(de)
 dec a
 ld b,a
-ld c,a
-add a,c
-add a,c
+add a,a
+add a,a
 ld c,a
 ld a,b
 ld (de),a
@@ -1025,13 +1090,17 @@ ex de,hl
 add hl,bc
 inc hl
 push hl
-ld c,3
+ld c,4
 call Alloc
 pop de
 pop hl
 pop bc
 push de
 push bc
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
 ld a,(hl)
 ld (de),a
 inc hl
@@ -1138,7 +1207,7 @@ jp (hl)
 ; Frees 2 ints (row and colomn) and a string and displays the string at the coordinates
 ; Stack: [top] row, col, string [bottom]
 Output:
-res AppAutoScroll, (IY + AppFlags)
+res AppAutoScroll,(IY + AppFlags)
 call FreeIntArg0 ; row
 call FreeIntArg1 ; col
 ld hl,IntArg0
@@ -1310,11 +1379,15 @@ jp (hl)
 ; Location of Int Var stored in de
 LoadIntVar:
 push de
-ld c,3
+ld c,4
 call Alloc
 pop de ; Allocated memory
 pop hl ; Location to load from
 push de
+ld a,(hl)
+ld (de),a
+inc de
+inc hl
 ld a,(hl)
 ld (de),a
 inc de
@@ -1501,13 +1574,13 @@ One:
 .db $01, $00, $00
 
 IntArg0:
-.db $00, $00, $00
+.db $00, $00, $00, $00
 IntArg1:
-.db $00, $00, $00
+.db $00, $00, $00, $00
 
 ; Table of IntVars (A-Z)
 IntVar:
-.ds $4E, $0
+.ds $58, $0
 StrVar:
 .ds $14, $0
 ListVar:

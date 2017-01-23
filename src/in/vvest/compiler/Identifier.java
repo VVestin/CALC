@@ -25,7 +25,7 @@ public class Identifier extends Token {
 
 	public String getAddress() {
 		if (type == Type.INTEGER) {
-			return "IntVar+" + 3 * (id.charAt(0) - 'A');
+			return "IntVar+" + 4 * (id.charAt(0) - 'A');
 		} else if (type == Type.STRING) {
 			return "StrVar+" + 2 * (id.charAt(3) - '0');
 		} else if (type == Type.LIST) {
