@@ -29,7 +29,7 @@ public class Identifier extends Token {
 		} else if (type == Type.STRING) {
 			return "StrVar+" + 2 * (id.charAt(3) - '0');
 		} else if (type == Type.LIST) {
-			return "listVar+" + 2 * (id.charAt(1) - '0');
+			return "ListVar+" + 2 * (id.charAt(1) - '0');
 		}
 		return "Compile Error. Tried to get address of nonaddressable identifier";
 	}

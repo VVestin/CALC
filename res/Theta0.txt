@@ -1,3 +1,4 @@
+0->T
 4->X
 For(A,3,8)
 For(B,1,15,2)
@@ -23,11 +24,14 @@ ClrHome
 Stop
 ElseIf(K=1)
 6->A
-L1[X]+1->L1[X]
-While(A>L1[X])
-Output(7-A,2*X," ")
+L1[X]->B
+Output(1,1,B)
+B+1->L1[X]
+While(A>B)
+Output(8-A,2*X," ")
 A-1->A
-Output(7-A,2*X,"O")
+Output(8-A,2*X,sub("O0",T+1,1))
 End
+not(T)->T
 End
 End

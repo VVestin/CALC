@@ -4,6 +4,11 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+76
+	call StoIntVar
 	ld bc,$0400
 	ld de,$0000
 	call PushIntLiteral
@@ -89,7 +94,7 @@ ForLoopEnd1:
 	call PushIntLiteral
 	ld a,7
 	call PushListLiteral
-	ld de,listVar+2
+	ld de,ListVar+2
 	call StoStrVar
 	ld hl,String2
 	call PushStringLiteral
@@ -238,16 +243,32 @@ If5:
 	call PushIntLiteral
 	ld de,IntVar+0
 	call StoIntVar
-	ld de,listVar+2
+	ld de,ListVar+2
 	call LoadListVar
 	ld de,IntVar+92
 	call LoadIntVar
 	call ListGet
+	ld de,IntVar+4
+	call StoIntVar
+	ld de,IntVar+4
+	call LoadIntVar
+	call Num2Str
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Output
+	ld de,IntVar+4
+	call LoadIntVar
 	ld bc,$0100
 	ld de,$0000
 	call PushIntLiteral
 	call Add
-	ld de,listVar+102
+	ld de,ListVar+2
+	; Address is ListVar+2
+	; Id is access
 	push de
 	ld de,IntVar+92
 	call LoadIntVar
@@ -255,11 +276,8 @@ If5:
 While2:
 	ld de,IntVar+0
 	call LoadIntVar
-	ld de,listVar+2
-	call LoadListVar
-	ld de,IntVar+92
+	ld de,IntVar+4
 	call LoadIntVar
-	call ListGet
 	scf
 	ccf
 	call Compare
@@ -273,7 +291,7 @@ While2:
 	ld de,IntVar+92
 	call LoadIntVar
 	call Mult
-	ld bc,$0700
+	ld bc,$0800
 	ld de,$0000
 	call PushIntLiteral
 	ld de,IntVar+0
@@ -292,13 +310,23 @@ While2:
 	call StoIntVar
 	ld hl,String6
 	call PushStringLiteral
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+76
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	call SubString
 	ld bc,$0200
 	ld de,$0000
 	call PushIntLiteral
 	ld de,IntVar+92
 	call LoadIntVar
 	call Mult
-	ld bc,$0700
+	ld bc,$0800
 	ld de,$0000
 	call PushIntLiteral
 	ld de,IntVar+0
@@ -308,6 +336,11 @@ While2:
 	call Output
 	jp While2
 WhileEnd2:
+	ld de,IntVar+76
+	call LoadIntVar
+	call Not
+	ld de,IntVar+76
+	call StoIntVar
 	jp IfEnd1
 If6:
 IfEnd1:
@@ -326,7 +359,7 @@ String4:
 String5:
 .db 1," "
 String6:
-.db 1,"O"
+.db 2,"O0"
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work

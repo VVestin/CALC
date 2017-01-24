@@ -16,6 +16,10 @@ public class ListAccess extends Identifier {
 		code.add("call ListGet");
 	}
 
+	public String getAddress() {
+		return ((Identifier) list).getAddress();
+	}
+
 	public void setList(Token list) {
 		this.list = list;
 	}

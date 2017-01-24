@@ -61,7 +61,8 @@ public class Operator extends Token {
 			Identifier var = (Identifier) children.get(1);
 			code.add("ld de," + var.getAddress());
 			if (var instanceof ListAccess) {
-				if (!(((ListAccess) var).getList() instanceof Identifier)) System.err.println("Cannot store to an anonymous list");
+				code.add("; Address is " + var.getAddress());
+				code.add("; Id is " + var.getValue());
 				code.add("push de");
 				((ListAccess) var).getIndex().compile(code);	
 				code.add("call ListSet");

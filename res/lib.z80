@@ -9,6 +9,27 @@ pop bc
 ld (InitStack),sp
 push bc
 ; TODO set LSFR seed to a random number (register R and System time?)
+di
+ld hl,InterruptHandler
+ld ($993F),hl
+ld ($997F),hl
+ld ($99BF),hl
+ld ($99FF),hl
+ei
+ret
+
+;.module InterruptHandler
+; Handles interrupts. Checks if bit 0 of port 4 is set (Means Interrupt Caused By [ON]).
+InterruptHandler:
+ex af,af'
+exx
+xor a
+out (3),a
+in a,(3)
+bit 0
+ex af,af'
+exx
+ei
 ret
 
 ;.module FreeIntArg0
