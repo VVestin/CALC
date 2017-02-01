@@ -4,17 +4,7 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+76
-	call StoIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call StoIntVar
-	ld bc,$0300
+	ld bc,$0100
 	ld de,$0000
 	call PushIntLiteral
 	ld de,IntVar+0
@@ -22,48 +12,19 @@
 ForLoop1:
 	ld de,IntVar+0
 	call LoadIntVar
-	ld bc,$0800
+	ld bc,$6400
 	ld de,$0000
 	call PushIntLiteral
 	scf
 	call CompareEqual
 	ld hl,ForLoopEnd1
 	call If
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+4
-	call StoIntVar
-ForLoop2:
-	ld de,IntVar+4
-	call LoadIntVar
-	ld bc,$0F00
-	ld de,$0000
-	call PushIntLiteral
-	scf
-	call CompareEqual
-	ld hl,ForLoopEnd2
-	call If
-	ld hl,String1
-	call PushStringLiteral
-	ld de,IntVar+4
-	call LoadIntVar
 	ld de,IntVar+0
 	call LoadIntVar
-	call Output
-	ld de,IntVar+4
+	call DispNum
+	ld de,IntVar+0
 	call LoadIntVar
 	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	ld de,IntVar+4
-	call StoIntVar
-	jp ForLoop2
-ForLoopEnd2:
-	ld de,IntVar+0
-	call LoadIntVar
-	ld bc,$0100
 	ld de,$0000
 	call PushIntLiteral
 	call Add
@@ -71,295 +32,8 @@ ForLoopEnd2:
 	call StoIntVar
 	jp ForLoop1
 ForLoopEnd1:
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld a,7
-	call PushListLiteral
-	ld de,ListVar+2
-	call StoStrVar
-	ld hl,String2
-	call PushStringLiteral
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Output
-While1:
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld hl,WhileEnd1
-	call If
-RepeatLoop1:
-	call GetKey
-	ld de,IntVar+40
-	call StoIntVar
-	ld de,IntVar+40
-	call LoadIntVar
-	ld hl,RepeatLoop1
-	call If
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	scf
-	call Compare
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	scf
-	ccf
-	call Compare
-	call And
-	ld hl,If1
-	call if
-	ld hl,String3
-	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Output
-	ld de,IntVar+92
-	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
-	scf
-	call Compare
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0300
-	ld de,$0000
-	call PushIntLiteral
-	call Equals
-	call And
-	ld hl,If2
-	call if
-	ld de,IntVar+92
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	ld de,IntVar+92
-	call StoIntVar
-	jp IfEnd2
-If2:
-	ld de,IntVar+92
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	scf
-	ccf
-	call Compare
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	call Equals
-	call And
-	ld hl,If3
-	call If
-	ld de,IntVar+92
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Negate
-	call Add
-	ld de,IntVar+92
-	call StoIntVar
-	jp IfEnd2
-If3:
-IfEnd2:
-	ld hl,String4
-	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Output
-	jp IfEnd1
-If1:
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0F00
-	ld de,$0000
-	call PushIntLiteral
-	call Equals
-	ld hl,If5
-	call If
-	call ClrHome
-	call Stop
-	jp IfEnd1
-If5:
-	ld de,IntVar+40
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Equals
-	ld hl,If6
-	call If
-	ld bc,$0600
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+0
-	call StoIntVar
-	ld de,ListVar+2
-	call LoadListVar
-	ld de,IntVar+92
-	call LoadIntVar
-	call ListGet
-	ld de,IntVar+4
-	call StoIntVar
-	ld de,IntVar+4
-	call LoadIntVar
-	call Num2Str
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Output
-	ld de,IntVar+4
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	ld de,ListVar+2
-	; Address is ListVar+2
-	; Id is access
-	push de
-	ld de,IntVar+92
-	call LoadIntVar
-	call ListSet
-While2:
-	ld de,IntVar+0
-	call LoadIntVar
-	ld de,IntVar+4
-	call LoadIntVar
-	scf
-	ccf
-	call Compare
-	ld hl,WhileEnd2
-	call If
-	ld hl,String5
-	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+0
-	call LoadIntVar
-	call Negate
-	call Add
-	call Output
-	ld de,IntVar+0
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Negate
-	call Add
-	ld de,IntVar+0
-	call StoIntVar
-	ld hl,String6
-	call PushStringLiteral
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+76
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	call SubString
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+0
-	call LoadIntVar
-	call Negate
-	call Add
-	call Output
-	jp While2
-WhileEnd2:
-	ld de,IntVar+76
-	call LoadIntVar
-	call Not
-	ld de,IntVar+76
-	call StoIntVar
-	jp IfEnd1
-If6:
-IfEnd1:
-	jp While1
-WhileEnd1:
 	call Stop
 	
-String1:
-.db 1,"|"
-String2:
-.db 1,"V"
-String3:
-.db 1," "
-String4:
-.db 1,"V"
-String5:
-.db 1," "
-String6:
-.db 2,"O0"
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work
@@ -371,6 +45,43 @@ Setup:
 	ld (InitStack),sp
 	push bc
 	; TODO set LSFR seed to a random number (register R and System time?)
+	di
+	ld hl,InterruptHandler
+	ld ($993F),hl
+	ld ($997F),hl
+	ld ($99BF),hl
+	ld ($99FF),hl
+	ld a,$99
+	ld i,a
+	ld a,%1101
+	out (3),a
+	im 2
+	ei 
+	ret
+	
+	;.module InterruptHandler
+	; Handles interrupts. Checks if bit 0 of port 4 is set (Means Interrupt Caused By [ON]).
+InterruptHandler:
+	ex  af, af'
+	exx
+	xor a 
+	out (3), a
+	in a,(4)
+	cp $8
+	jr z,_InterruptNotON
+	pop bc
+	ld a, %1101 
+	out (3), a
+	ex af, af'
+	exx
+	ei
+	call Stop
+_InterruptNotON:
+	ld a, %1101 
+	out (3), a
+	ex af, af'
+	exx
+	ei
 	ret
 	
 	;.module FreeIntArg0
@@ -429,6 +140,7 @@ ClrHome:
 Stop:
 	ld sp,(InitStack)
 	res 5,(iy+0) 
+	im 1
 	ret
 	
 	;.module If
@@ -1016,7 +728,7 @@ _MultShiftLoopA:
 	push de
 	jp (hl)
 MultResult:
-.db $00, $00, $00, $00, $00, $00
+.db $00, $00, $00, $00, $00, $00, $00, $00
 	
 	;.module Divide
 	; Pops 2 numbers off the stack and divides them by one another and pushes the quotient
@@ -1915,9 +1627,9 @@ Free:
 	ret 
 	
 Billion:
-.db $00, $CA, $9A, $3B
+.db $CA, $9A, $3B
 Hundred_Million:
-.db $00, $E1, $F5, $05
+.db $E1, $F5, $05
 Ten_Million:
 .db $80, $96, $98
 Million:

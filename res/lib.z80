@@ -15,19 +15,35 @@ ld ($993F),hl
 ld ($997F),hl
 ld ($99BF),hl
 ld ($99FF),hl
-ei
+ld a,$99
+ld i,a
+ld a,%1101
+out (3),a
+im 2
+ei 
 ret
 
 ;.module InterruptHandler
 ; Handles interrupts. Checks if bit 0 of port 4 is set (Means Interrupt Caused By [ON]).
 InterruptHandler:
-ex af,af'
+ex  af, af'
 exx
-xor a
-out (3),a
-in a,(3)
-bit 0
-ex af,af'
+xor a 
+out (3), a
+in a,(4)
+cp $8
+jr z,_InterruptNotON
+pop bc
+ld a, %1101 
+out (3), a
+ex af, af'
+exx
+ei
+call Stop
+_InterruptNotON:
+ld a, %1101 
+out (3), a
+ex af, af'
 exx
 ei
 ret
@@ -88,6 +104,7 @@ ret
 Stop:
 ld sp,(InitStack)
 res 5,(iy+0) 
+im 1
 ret
 
 ;.module If
@@ -675,7 +692,7 @@ pop hl
 push de
 jp (hl)
 MultResult:
-.db $00, $00, $00, $00, $00, $00
+.db $00, $00, $00, $00, $00, $00, $00, $00
 
 ;.module Divide
 ; Pops 2 numbers off the stack and divides them by one another and pushes the quotient
@@ -1574,9 +1591,9 @@ ld (de),a
 ret 
 
 Billion:
-.db $00, $CA, $9A, $3B
+.db $CA, $9A, $3B
 Hundred_Million:
-.db $00, $E1, $F5, $05
+.db $E1, $F5, $05
 Ten_Million:
 .db $80, $96, $98
 Million:
