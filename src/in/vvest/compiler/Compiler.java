@@ -48,6 +48,7 @@ public class Compiler {
 	public void compile(String src) {
 		System.out.println(src.replace(":", "\n"));
 		List<Token> tokens = lex.tokenize(src);
+		System.out.println(tokens);
 		Token prgm = parser.parse(tokens);
 		prgm.print();
 		try {
@@ -67,7 +68,7 @@ public class Compiler {
 		code.add("");
 		prgm.addData(code);
 		for (String statement : code) {
-			System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") || statement.startsWith(";") ? "" : "\t") + statement);
+		//	System.out.println((statement.endsWith(":") || statement.startsWith(".") || statement.startsWith("#") || statement.startsWith(";") ? "" : "\t") + statement);
 		}
 		// Include lib.z80 at the bottom
 		try {

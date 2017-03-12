@@ -1,37 +1,4 @@
-0->T
-4->X
-For(A,3,8)
-For(B,1,15,2)
-Output(A,B,"|")
-End
-End
-{0,0,0,0,0,0,0}->L1
-Output(1,8,"V")
-While(1)
 Repeat(K)
 getKey->K
-End
-If(K<4 and K>1)
-Output(1,2*X," ")
-If(X<7 and K=3)
-X+1->X
-ElseIf(X>1 and K=2)
-X-1->X
-End
-Output(1,2*X,"V")
-ElseIf(K=15)
-ClrHome
-Stop
-ElseIf(K=1)
-6->A
-L1[X]->B
-Output(1,1,B)
-B+1->L1[X]
-While(A>B)
-Output(8-A,2*X," ")
-A-1->A
-Output(8-A,2*X,sub("O0",T+1,1))
-End
-not(T)->T
-End
+Disp(K)
 End

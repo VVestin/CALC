@@ -1,32 +1,38 @@
-Fun LEFT(S,T,H)
-For(Y,T,H)
-Output(Y,S,Str1)
+Fun FOO(T)
+getTime+T->T
+While(getTime=/=T)
 End
-Return(S+1)
 End
 
-"*"->Str1
-12->W
+Fun HORIZ(Y,A,B)
+For(Z,A,B)
+Output(Y,Z,"*")
+End
+FOO(1)
+End
+
+Fun VERT(X,A,B)
+For(Z,A,B)
+Output(Z,X,"*")
+End
+FOO(1)
+End
+
+14->W
 8->H
-1->S
+3->S
 1->T
-While(S<W and T<H)
-For(X,S,W)
-Output(T,X,Str1)
-End
+While(S<=W and T<=H)
+HORIZ(T,S,W)
 T+1->T
-For(Y,T,H)
-Output(Y,W,Str1)
-End
+VERT(W,T,H)
 W-1->W
-For(X,S,W)
-Output(H,X,Str1)
-End
+HORIZ(H,S,W)
 H-1->H
-?For(Y,T,H)
-?Output(Y,S,Str1)
-?End
-?S+1->S
-LEFT(S,T,H)->S
-Pause
+VERT(S,T,H)
+S+1->S
+End
+
+While(getKey=0)
+Output(rand%8+1,rand%16+1,"SB")
 End

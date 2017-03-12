@@ -9,18 +9,18 @@ pop bc
 ld (InitStack),sp
 push bc
 ; TODO set LSFR seed to a random number (register R and System time?)
-di
-ld hl,InterruptHandler
-ld ($993F),hl
-ld ($997F),hl
-ld ($99BF),hl
-ld ($99FF),hl
-ld a,$99
-ld i,a
-ld a,%1101
-out (3),a
-im 2
-ei 
+;di
+;ld hl,InterruptHandler
+;ld ($993F),hl
+;ld ($997F),hl
+;ld ($99BF),hl
+;ld ($99FF),hl
+;ld a,$99
+;ld i,a
+;ld a,%1101
+;out (3),a
+;im 2
+;ei 
 ret
 
 ;.module InterruptHandler
@@ -183,6 +183,81 @@ push hl
 ex de,hl
 jp (hl)
 
+;.module PushIntLiteral3Byte
+; Pushes the number in bcd to stack
+PushIntLiteral3Byte:
+push de
+push bc
+ld c,4
+call Alloc
+pop hl
+pop bc
+pop de
+ld (hl),b
+inc hl
+ld (hl),c
+inc hl
+ld (hl),d
+inc hl
+ld (hl),0
+pop de
+dec hl
+dec hl
+dec hl
+push hl
+ex de,hl
+jp (hl)
+
+;.module PushIntLiteral2Byte
+; Pushes the number in bc to stack
+PushIntLiteral2Byte:
+push de
+push bc
+ld c,4
+call Alloc
+pop hl
+pop bc
+pop de
+ld (hl),b
+inc hl
+ld (hl),c
+inc hl
+ld (hl),0
+inc hl
+ld (hl),0
+pop de
+dec hl
+dec hl
+dec hl
+push hl
+ex de,hl
+jp (hl)
+
+;.module PushIntLiteral1Byte
+; Pushes the number in b to stack
+PushIntLiteral1Byte:
+push de
+push bc
+ld c,4
+call Alloc
+pop hl
+pop bc
+pop de
+ld (hl),b
+inc hl
+ld (hl),0
+inc hl
+ld (hl),0
+inc hl
+ld (hl),0
+pop de
+dec hl
+dec hl
+dec hl
+push hl
+ex de,hl
+jp (hl)
+
 NewList:
 .dw $00
 PushListRetLoc:
@@ -245,9 +320,8 @@ inc de
 ld a,(de)
 ld h,a
 ld a,(hl)
-ld c,a
-add a,c
-add a,c
+add a,a
+add a,a
 ld c,a
 inc c
 push hl
@@ -257,8 +331,8 @@ pop hl ; List var
 push de
 ld b,(hl)
 ld a,b
-add a,b
-add a,b
+add a,a
+add a,a
 ld b,a
 inc b
 _LoadListVarLoop:
@@ -523,17 +597,21 @@ ld c,4
 call Alloc
 call RandLFSR
 pop hl
-inc hl
 ld (hl),a
+inc hl
 push hl
 call RandLFSR
 pop hl
-inc hl
 ld (hl),a
+inc hl
 push hl
 call RandLFSR
 pop hl
+ld (hl),a
 inc hl
+push hl
+call RandLFSR
+pop hl
 ld (hl),a
 dec hl
 dec hl
@@ -817,6 +895,9 @@ ret
 ShiftRight:
 pop de
 pop hl
+xor a
+or b
+jr z,_ShiftRightSkip
 _ShiftRightLoop:
 inc hl
 inc hl
@@ -829,6 +910,7 @@ rr (hl)
 dec hl
 rr (hl)
 djnz _ShiftRightLoop
+_ShiftRightSkip:
 ex de,hl
 push de
 jp (hl)
@@ -838,6 +920,9 @@ jp (hl)
 ShiftLeft:
 pop de
 pop hl
+xor a
+or b
+jr z,_ShiftLeftSkip
 _ShiftLeftLoop:
 sla (hl)
 inc hl
@@ -850,6 +935,7 @@ dec hl
 dec hl
 dec hl
 djnz _ShiftLeftLoop
+_ShiftLeftSkip:
 ex de,hl
 push de
 jp (hl)
@@ -975,9 +1061,46 @@ ld (de),a
 dec hl
 dec hl
 dec hl
+dec hl
 push hl
 call Free ; Free the list
 ret
+
+;.module ListVarGet
+; Gets the element at the index on the top of the stack from the list at hl.
+; Does not deallocate the list at hl. Should only be used on persistent list vars.
+ListVarGet:
+pop bc
+pop de
+push bc
+ld a,(de) 
+add a,a
+add a,a
+inc a
+ld c,a
+ld b,0
+add hl,bc
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+ld a,(hl)
+ld (de),a
+inc hl
+inc de
+ld a,(hl)
+ld (de),a
+dec de
+dec de
+dec de
+pop hl
+push de
+jp (hl)
+
 
 ;.module ListSet
 ; Sets the element at the index on top of the stack in the list below it to the value below that 
@@ -1222,7 +1345,6 @@ push bc
 push de
 push hl
 ld a,(IntArg0)
-dec a
 ld c,a
 ld b,0
 add hl,bc
@@ -1250,11 +1372,9 @@ call FreeIntArg0 ; row
 call FreeIntArg1 ; col
 ld hl,IntArg0
 ld a,(hl)
-dec a
 ld (CurRow),a
 ld hl,IntArg1
 ld a,(hl)
-dec a
 ld (CurCol),a
 pop de
 pop hl
@@ -1635,4 +1755,4 @@ FreePtr:
 
 Heap:
 .dw $00
-.ds $200, $0 ; 512 bytes for the heap otherwise OS will put important data there
+.ds $800, $0 ; 1024 bytes for the heap otherwise OS will put important data there

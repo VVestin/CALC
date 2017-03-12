@@ -4,36 +4,460 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
-	ld bc,$0100
+	ld bc,$ACEB
+	ld de,$BDCA
+	call PushIntLiteral
+	ld bc,$9999
+	ld de,$9999
+	call PushIntLiteral
+	ld bc,$0000
 	ld de,$0000
 	call PushIntLiteral
-	ld de,IntVar+0
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$1111
+	ld de,$1111
+	call PushIntLiteral
+	ld bc,$2463
+	ld de,$3542
+	call PushIntLiteral
+	ld a,8
+	call PushListLiteral
+	ld de,ListVar+2
+	call StoStrVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
 	call StoIntVar
 ForLoop1:
-	ld de,IntVar+0
+	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$6400
+	ld bc,$0700
 	ld de,$0000
 	call PushIntLiteral
 	scf
 	call CompareEqual
 	ld hl,ForLoopEnd1
 	call If
-	ld de,IntVar+0
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call StoIntVar
+ForLoop2:
+	ld de,IntVar+92
 	call LoadIntVar
-	call DispNum
-	ld de,IntVar+0
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call CompareEqual
+	ld hl,ForLoopEnd2
+	call If
+	call FunGETCHARPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGETCHAR
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call LoadIntVar
+	call Negate
+	call Add
+	call Output
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	ld de,IntVar+92
+	call StoIntVar
+	jp ForLoop2
+ForLoopEnd2:
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	ld de,IntVar+96
+	call StoIntVar
+	jp ForLoop1
+ForLoopEnd1:
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call StoIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,String2
+	call PushStringLiteral
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+RepeatLoop1:
+RepeatLoop2:
+	call GetKey
+	ld de,IntVar+40
+	call StoIntVar
+	ld de,IntVar+40
+	call LoadIntVar
+	ld hl,RepeatLoop2
+	call If
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call CompareEqual
+	ld hl,If1
+	call if
+	ld hl,String3
+	call PushStringLiteral
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	call And
+	ld hl,If2
+	call if
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	ld de,IntVar+96
+	call StoIntVar
+	jp IfEnd2
+If2:
+	ld de,IntVar+40
 	call LoadIntVar
 	ld bc,$0200
 	ld de,$0000
 	call PushIntLiteral
+	call Equals
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	ccf
+	call Compare
+	call And
+	ld hl,If3
+	call If
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Negate
 	call Add
-	ld de,IntVar+0
+	ld de,IntVar+92
 	call StoIntVar
-	jp ForLoop1
-ForLoopEnd1:
+	jp IfEnd2
+If3:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0300
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	call And
+	ld hl,If4
+	call If
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Add
+	ld de,IntVar+92
+	call StoIntVar
+	jp IfEnd2
+If4:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	ccf
+	call Compare
+	call And
+	ld hl,If5
+	call If
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call StoIntVar
+	jp IfEnd2
+If5:
+IfEnd2:
+	ld hl,String4
+	call PushStringLiteral
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+	jp IfEnd1
+If1:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$3600
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld hl,If7
+	call If
+	ld hl,String5
+	call PushStringLiteral
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+	jp IfEnd1
+If7:
+IfEnd1:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0F00
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld hl,RepeatLoop1
+	call If
+	call ClrHome
+	ld hl,String6
+	call PushStringLiteral
+	call Disp
 	call Stop
 	
+String1:
+.db 15," PNBRQK  pnbrkq"
+FunGETCHARPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunGETCHAR:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	ld de,IntVar+8
+	call StoIntVar
+	ld hl,String1
+	call PushStringLiteral
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+8
+	call LoadIntVar
+	call SubString
+	jp FunReturnGETCHAR
+FunReturnGETCHAR:
+	pop hl
+	ld (FuncRet),hl
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncRet)
+	push hl
+	ld hl,(FuncTemp)
+	jp (hl)
+FunDLYPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+76
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunDLY:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+76
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	call GetTime
+	ld de,IntVar+76
+	call LoadIntVar
+	call Add
+	ld de,IntVar+76
+	call StoIntVar
+RepeatLoop3:
+	call GetTime
+	ld de,IntVar+76
+	call LoadIntVar
+	call Equals
+	ld hl,RepeatLoop3
+	call If
+FunReturnDLY:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+76
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunGETPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunGET:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(ListVar+2)
+	call ListVarGet
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Mult
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	ld b,28
+	call ShiftRight
+	jp FunReturnGET
+FunReturnGET:
+	pop hl
+	ld (FuncRet),hl
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncRet)
+	push hl
+	ld hl,(FuncTemp)
+	jp (hl)
+String2:
+.db 1,">"
+String3:
+.db 1," "
+String4:
+.db 1,">"
+String5:
+.db 1,"<"
+String6:
+.db 14,"  Good Game :)"
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work
@@ -45,18 +469,18 @@ Setup:
 	ld (InitStack),sp
 	push bc
 	; TODO set LSFR seed to a random number (register R and System time?)
-	di
-	ld hl,InterruptHandler
-	ld ($993F),hl
-	ld ($997F),hl
-	ld ($99BF),hl
-	ld ($99FF),hl
-	ld a,$99
-	ld i,a
-	ld a,%1101
-	out (3),a
-	im 2
-	ei 
+	;di
+	;ld hl,InterruptHandler
+	;ld ($993F),hl
+	;ld ($997F),hl
+	;ld ($99BF),hl
+	;ld ($99FF),hl
+	;ld a,$99
+	;ld i,a
+	;ld a,%1101
+	;out (3),a
+	;im 2
+	;ei 
 	ret
 	
 	;.module InterruptHandler
@@ -219,6 +643,81 @@ PushIntLiteral:
 	ex de,hl
 	jp (hl)
 	
+	;.module PushIntLiteral3Byte
+	; Pushes the number in bcd to stack
+PushIntLiteral3Byte:
+	push de
+	push bc
+	ld c,4
+	call Alloc
+	pop hl
+	pop bc
+	pop de
+	ld (hl),b
+	inc hl
+	ld (hl),c
+	inc hl
+	ld (hl),d
+	inc hl
+	ld (hl),0
+	pop de
+	dec hl
+	dec hl
+	dec hl
+	push hl
+	ex de,hl
+	jp (hl)
+	
+	;.module PushIntLiteral2Byte
+	; Pushes the number in bc to stack
+PushIntLiteral2Byte:
+	push de
+	push bc
+	ld c,4
+	call Alloc
+	pop hl
+	pop bc
+	pop de
+	ld (hl),b
+	inc hl
+	ld (hl),c
+	inc hl
+	ld (hl),0
+	inc hl
+	ld (hl),0
+	pop de
+	dec hl
+	dec hl
+	dec hl
+	push hl
+	ex de,hl
+	jp (hl)
+	
+	;.module PushIntLiteral1Byte
+	; Pushes the number in b to stack
+PushIntLiteral1Byte:
+	push de
+	push bc
+	ld c,4
+	call Alloc
+	pop hl
+	pop bc
+	pop de
+	ld (hl),b
+	inc hl
+	ld (hl),0
+	inc hl
+	ld (hl),0
+	inc hl
+	ld (hl),0
+	pop de
+	dec hl
+	dec hl
+	dec hl
+	push hl
+	ex de,hl
+	jp (hl)
+	
 NewList:
 .dw $00
 PushListRetLoc:
@@ -281,9 +780,8 @@ LoadListVar:
 	ld a,(de)
 	ld h,a
 	ld a,(hl)
-	ld c,a
-	add a,c
-	add a,c
+	add a,a
+	add a,a
 	ld c,a
 	inc c
 	push hl
@@ -293,8 +791,8 @@ LoadListVar:
 	push de
 	ld b,(hl)
 	ld a,b
-	add a,b
-	add a,b
+	add a,a
+	add a,a
 	ld b,a
 	inc b
 _LoadListVarLoop:
@@ -559,17 +1057,21 @@ Rand:
 	call Alloc
 	call RandLFSR
 	pop hl
-	inc hl
 	ld (hl),a
+	inc hl
 	push hl
 	call RandLFSR
 	pop hl
-	inc hl
 	ld (hl),a
+	inc hl
 	push hl
 	call RandLFSR
 	pop hl
+	ld (hl),a
 	inc hl
+	push hl
+	call RandLFSR
+	pop hl
 	ld (hl),a
 	dec hl
 	dec hl
@@ -853,6 +1355,9 @@ Add:
 ShiftRight:
 	pop de
 	pop hl
+	xor a
+	or b
+	jr z,_ShiftRightSkip
 _ShiftRightLoop:
 	inc hl
 	inc hl
@@ -865,6 +1370,7 @@ _ShiftRightLoop:
 	dec hl
 	rr (hl)
 	djnz _ShiftRightLoop
+_ShiftRightSkip:
 	ex de,hl
 	push de
 	jp (hl)
@@ -874,6 +1380,9 @@ _ShiftRightLoop:
 ShiftLeft:
 	pop de
 	pop hl
+	xor a
+	or b
+	jr z,_ShiftLeftSkip
 _ShiftLeftLoop:
 	sla (hl)
 	inc hl
@@ -886,6 +1395,7 @@ _ShiftLeftLoop:
 	dec hl
 	dec hl
 	djnz _ShiftLeftLoop
+_ShiftLeftSkip:
 	ex de,hl
 	push de
 	jp (hl)
@@ -1011,9 +1521,46 @@ ListGet:
 	dec hl
 	dec hl
 	dec hl
+	dec hl
 	push hl
 	call Free ; Free the list
 	ret
+	
+	;.module ListVarGet
+	; Gets the element at the index on the top of the stack from the list at hl.
+	; Does not deallocate the list at hl. Should only be used on persistent list vars.
+ListVarGet:
+	pop bc
+	pop de
+	push bc
+	ld a,(de) 
+	add a,a
+	add a,a
+	inc a
+	ld c,a
+	ld b,0
+	add hl,bc
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	inc hl
+	inc de
+	ld a,(hl)
+	ld (de),a
+	dec de
+	dec de
+	dec de
+	pop hl
+	push de
+	jp (hl)
+	
 	
 	;.module ListSet
 	; Sets the element at the index on top of the stack in the list below it to the value below that 
@@ -1258,7 +1805,6 @@ SubString:
 	push de
 	push hl
 	ld a,(IntArg0)
-	dec a
 	ld c,a
 	ld b,0
 	add hl,bc
@@ -1286,11 +1832,9 @@ Output:
 	call FreeIntArg1 ; col
 	ld hl,IntArg0
 	ld a,(hl)
-	dec a
 	ld (CurRow),a
 	ld hl,IntArg1
 	ld a,(hl)
-	dec a
 	ld (CurCol),a
 	pop de
 	pop hl
@@ -1671,4 +2215,4 @@ FreePtr:
 	
 Heap:
 .dw $00
-.ds $200, $0 ; 512 bytes for the heap otherwise OS will put important data there
+.ds $800, $0 ; 1024 bytes for the heap otherwise OS will put important data there

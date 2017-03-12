@@ -40,6 +40,10 @@ public class Function extends Token {
 		return returnType;
 	}
 
+	public Token copy() {
+		return new Function(label, arity, returnType);
+	}
+
 	public static class Disp extends Function {
 		public Disp() {
 			super("Disp", VARIADIC_ARITY, Type.VOID);

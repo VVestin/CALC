@@ -1,0 +1,6 @@
+getTime->T
+For(N,1,1000)
+For(A,1,10)
+End
+End
+Disp(0,getTime-T)

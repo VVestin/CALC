@@ -11,9 +11,15 @@ public class ListAccess extends Identifier {
 	}
 
 	public void compile(List<String> code) {
-		list.compile(code);
-		index.compile(code);
-		code.add("call ListGet");
+		if (list instanceof Identifier) {
+			index.compile(code);
+			code.add("ld hl,(" + ((Identifier) list).getAddress() + ")");
+			code.add("call ListVarGet");	
+		} else {
+			list.compile(code);
+			index.compile(code);
+			code.add("call ListGet");
+		}
 	}
 
 	public String getAddress() {
@@ -38,6 +44,10 @@ public class ListAccess extends Identifier {
 
 	public Type getType() {
 		return Type.INTEGER;
+	}
+
+	public String getValue() {
+		return list.toString();
 	}
 
 	public boolean isCompileable() {

@@ -1,3 +1,7 @@
-For(A,1,100,2)
-Disp(A)
+Fun FACT(X)
+If(X=0)
+Return(1)
 End
+Return(X*FACT(X-1))
+End
+Disp(FACT(5))

@@ -1,1 +1,55 @@
-" PpNnBbRrQqKk"->Str1
+? P = $1 p = $9
+? N = $2 n = $A
+? B = $3 b = $B
+? R = $4 r = $C
+? K = $5 k = $D
+? Q = $6 q = $E
+{$42356324,$11111111,0,0,0,0,$99999999,$CABDEBAC}->L1
+
+Fun GETCHAR(X,Y) 
+GET(X,Y)->C
+Return(sub(" PNBRQK  pnbrkq",C,1))
+End
+
+Fun DLY(T)
+getTime+T->T
+Repeat(getTime=T)
+End
+End
+
+Fun GET(X,Y)
+Return((L1[Y]<<(4*X))>>28)
+End
+
+For(Y,0,7)
+For(X,0,7)
+Output(7-Y,2*X+1,GETCHAR(X,Y))
+End
+End
+
+4->X
+4->Y
+Output(Y,2*X,">")
+
+Repeat(K=15)
+Repeat(K)
+getKey->K
+End
+If(K<=4)
+Output(Y,2*X," ")
+If(K=1 and Y<7)
+Y+1->Y
+ElseIf(K=2 and X>0)
+X-1->X
+ElseIf(K=3 and X<7)
+X+1->X
+ElseIf(K=4 and Y>0)
+Y-1->Y
+End
+Output(Y,2*X,">")
+ElseIf(K=$36)
+Output(Y,2*X,"<")
+End
+End
+ClrHome
+Disp("  Good Game :)")

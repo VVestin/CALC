@@ -326,7 +326,16 @@ public class Operator extends Token {
 		
 		public void compile(List<String> code) {
 			children.get(0).compile(code);
-			code.add("ld b," + ((Literal) children.get(1)).getValue());
+			if (children.get(1) instanceof Literal) {
+				code.add("ld b," + ((Literal) children.get(1)).getValue());
+			} else { 
+				children.get(1).compile(code);
+				code.add("push hl");
+				code.add("call FreeIntArg0");
+				code.add("pop hl");
+				code.add("ld hl,IntArg0");
+				code.add("ld b,(hl)");
+			}
 			code.add("call Shift" + (left ? "Left" : "Right"));
 		}
 
