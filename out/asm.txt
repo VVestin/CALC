@@ -32,6 +32,77 @@
 	call PushListLiteral
 	ld de,ListVar+2
 	call StoStrVar
+	ld bc,$F0FF
+	ld de,$FFFF
+	call PushIntLiteral
+	ld bc,$0FFF
+	ld de,$FFFF
+	call PushIntLiteral
+	ld bc,$FFF0
+	ld de,$FFFF
+	call PushIntLiteral
+	ld bc,$FF0F
+	ld de,$FFFF
+	call PushIntLiteral
+	ld bc,$FFFF
+	ld de,$F0FF
+	call PushIntLiteral
+	ld bc,$FFFF
+	ld de,$0FFF
+	call PushIntLiteral
+	ld bc,$FFFF
+	ld de,$FFF0
+	call PushIntLiteral
+	ld bc,$FFFF
+	ld de,$FF0F
+	call PushIntLiteral
+	ld a,8
+	call PushListLiteral
+	ld de,ListVar+4
+	call StoStrVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+36
+	call StoIntVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+40
+	call StoIntVar
+	call FunSETPre
+	ld bc,$0500
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	call FunSET
+	call FunSETPre
+	ld bc,$0600
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0500
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	call FunSET
+	call FunSETPre
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0200
+	ld de,$0000
+	call PushIntLiteral
+	call FunSET
 	ld bc,$0000
 	ld de,$0000
 	call PushIntLiteral
@@ -106,27 +177,6 @@ ForLoopEnd2:
 	call StoIntVar
 	jp ForLoop1
 ForLoopEnd1:
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call StoIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+96
-	call StoIntVar
-	ld hl,String2
-	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld de,IntVar+96
-	call LoadIntVar
-	call Output
 RepeatLoop1:
 RepeatLoop2:
 	call GetKey
@@ -145,7 +195,7 @@ RepeatLoop2:
 	call CompareEqual
 	ld hl,If1
 	call if
-	ld hl,String3
+	ld hl,String2
 	call PushStringLiteral
 	ld bc,$0200
 	ld de,$0000
@@ -265,7 +315,7 @@ If4:
 	jp IfEnd2
 If5:
 IfEnd2:
-	ld hl,String4
+	ld hl,String3
 	call PushStringLiteral
 	ld bc,$0200
 	ld de,$0000
@@ -286,17 +336,56 @@ If1:
 	call Equals
 	ld hl,If7
 	call If
-	ld hl,String5
-	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
+	ld de,IntVar+36
 	call LoadIntVar
-	call Mult
+	ld de,IntVar+40
+	call LoadIntVar
+	call BitOr
+	ld hl,If8
+	call if
+	call FunGETMOVPre
 	ld de,IntVar+96
 	call LoadIntVar
-	call Output
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGETMOV
+	ld hl,If9
+	call if
+	call FunMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+60
+	call LoadIntVar
+	call FunMOV
+	jp IfEnd9
+If9:
+IfEnd9:
+	jp IfEnd8
+If8:
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	ld de,IntVar+8
+	call StoIntVar
+	ld de,IntVar+8
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	call Equals
+	ld hl,If12
+	call if
+	jp IfEnd12
+If12:
+IfEnd12:
+	jp IfEnd8
+If11:
+IfEnd8:
 	jp IfEnd1
 If7:
 IfEnd1:
@@ -309,7 +398,7 @@ IfEnd1:
 	ld hl,RepeatLoop1
 	call If
 	call ClrHome
-	ld hl,String6
+	ld hl,String4
 	call PushStringLiteral
 	call Disp
 	call Stop
@@ -448,15 +537,329 @@ FunReturnGET:
 	push hl
 	ld hl,(FuncTemp)
 	jp (hl)
+FunSETPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+84
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunSET:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+84
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(ListVar+2)
+	call ListVarGet
+	ld de,IntVar+92
+	call LoadIntVar
+	ld hl,(ListVar+4)
+	call ListVarGet
+	call BitAnd
+	ld de,IntVar+84
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	call Negate
+	call Add
+	call Mult
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	call BitOr
+	ld de,ListVar+2
+	; Address is ListVar+2
+	; Id is [Identifier L1]
+	push de
+	ld de,IntVar+96
+	call LoadIntVar
+	call ListSet
+FunReturnSET:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+84
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunSETMOVPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunSETMOV:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0700
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	call And
+	ld hl,If16
+	call if
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	ld hl,If17
+	call if
+	ld de,IntVar+36
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0800
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+92
+	call LoadIntVar
+	call Add
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	call BitOr
+	ld de,IntVar+36
+	call StoIntVar
+	jp IfEnd17
+If17:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0800
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	call Negate
+	call Add
+	call Mult
+	ld de,IntVar+92
+	call LoadIntVar
+	call Add
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	call BitOr
+	ld de,IntVar+40
+	call StoIntVar
+	jp IfEnd17
+If18:
+IfEnd17:
+	jp IfEnd16
+If16:
+IfEnd16:
+FunReturnSETMOV:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunGETMOVPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunGETMOV:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	scf
+	call Compare
+	ld hl,If21
+	call if
+	ld de,IntVar+36
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0800
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call LoadIntVar
+	call Mult
+	ld de,IntVar+92
+	call LoadIntVar
+	call Add
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	call BitAnd
+	jp FunReturnGETMOV
+	jp IfEnd21
+If21:
+	ld de,IntVar+40
+	call LoadIntVar
+	ld bc,$0100
+	ld de,$0000
+	call PushIntLiteral
+	ld bc,$0800
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+96
+	call LoadIntVar
+	ld bc,$0400
+	ld de,$0000
+	call PushIntLiteral
+	call Negate
+	call Add
+	call Mult
+	ld de,IntVar+92
+	call LoadIntVar
+	call Add
+	push hl
+	call FreeIntArg0
+	pop hl
+	ld hl,IntArg0
+	ld b,(hl)
+	call ShiftLeft
+	call BitAnd
+	jp FunReturnGETMOV
+	jp IfEnd21
+If22:
+IfEnd21:
+FunReturnGETMOV:
+	pop hl
+	ld (FuncRet),hl
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncRet)
+	push hl
+	ld hl,(FuncTemp)
+	jp (hl)
+FunMOVPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+60
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunMOV:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+60
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call StoIntVar
+	ld hl,(FuncTemp)
+	push hl
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+36
+	call StoIntVar
+	ld bc,$0000
+	ld de,$0000
+	call PushIntLiteral
+	ld de,IntVar+40
+	call StoIntVar
+FunReturnMOV:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+60
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
 String2:
-.db 1,">"
-String3:
 .db 1," "
-String4:
+String3:
 .db 1,">"
-String5:
-.db 1,"<"
-String6:
+String4:
 .db 14,"  Good Game :)"
 	;.module Setup
 	; Does all of the setup necessary to run a program.

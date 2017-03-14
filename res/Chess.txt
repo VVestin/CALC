@@ -5,6 +5,9 @@
 ? K = $5 k = $D
 ? Q = $6 q = $E
 {$42356324,$11111111,0,0,0,0,$99999999,$CABDEBAC}->L1
+{$0FFFFFFF,$F0FFFFFF,$FF0FFFFF,$FFF0FFFF,$FFFF0FFF,$FFFFF0FF,$FFFFFF0F,$FFFFFFF0}->L2
+0->J
+0->K
 
 Fun GETCHAR(X,Y) 
 GET(X,Y)->C
@@ -21,35 +24,76 @@ Fun GET(X,Y)
 Return((L1[Y]<<(4*X))>>28)
 End
 
+Fun SET(X,Y,V)
+(L1[Y]&L2[X])|(V<<(4*(7-X)))->L1[Y]
+End
+
+Fun SETMOV(X,Y)
+If(X<7 and Y<7)
+If(Y<4)
+J|(1<<(8*Y+X))->J
+Else
+K|(1<<(8*(Y-4)+X))->K
+End
+End
+End
+
+Fun GETMOV(X,Y)
+If(Y<4)
+Return(J&(1<<(8*Y+X)))
+Else
+Return(K&(1<<(8*(Y-4)+X)))
+End
+End
+
+Fun MOV(S,T,X,Y)
+0->J
+0->K
+End
+
 For(Y,0,7)
 For(X,0,7)
 Output(7-Y,2*X+1,GETCHAR(X,Y))
 End
 End
 
-4->X
-4->Y
-Output(Y,2*X,">")
-
 Repeat(K=15)
-Repeat(K)
-getKey->K
-End
-If(K<=4)
-Output(Y,2*X," ")
-If(K=1 and Y<7)
-Y+1->Y
-ElseIf(K=2 and X>0)
-X-1->X
-ElseIf(K=3 and X<7)
-X+1->X
-ElseIf(K=4 and Y>0)
-Y-1->Y
-End
-Output(Y,2*X,">")
-ElseIf(K=$36)
-Output(Y,2*X,"<")
-End
+	Repeat(K)
+		getKey->K
+	End
+	If(K<=4)
+		Output(Y,2*X," ")
+		If(K=1 and Y<7)
+			Y+1->Y
+		ElseIf(K=2 and X>0)
+			X-1->X
+		ElseIf(K=3 and X<7)
+			X+1->X
+		ElseIf(K=4 and Y>0)
+			Y-1->Y
+		End
+		Output(Y,2*X,">")
+	ElseIf(K=$36)
+		If(J|K)
+			If(GETMOV(X,Y))
+				MOV(S,T,X,Y)
+			End
+		Else
+			GET(X,Y)->C
+			X->S
+			Y->T
+			If(C=1)
+			
+			End
+			For(Y,0,7)
+				For(X,0,7)
+					If(GETMOV(X,Y))
+						Output(7-Y,2*X+1,"*")
+					End
+				End
+			End
+		End
+	End
 End
 ClrHome
 Disp("  Good Game :)")
