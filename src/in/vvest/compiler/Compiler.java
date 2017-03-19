@@ -48,7 +48,7 @@ public class Compiler {
 	public void compile(String src) {
 		System.out.println(src.replace(":", "\n"));
 		List<Token> tokens = lex.tokenize(src);
-		System.out.println(tokens);
+		//System.out.println(tokens);
 		Token prgm = parser.parse(tokens);
 		prgm.print();
 		try {

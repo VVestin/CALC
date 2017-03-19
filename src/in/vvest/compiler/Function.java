@@ -86,6 +86,9 @@ public class Function extends Token {
 		public Output() {
 			super("Output", 3, Type.VOID);
 		}
+		public Output(String s, int i, Type t) {
+			super(s, i, t);
+		}
 		public void compile(List<String> code) {
 			if (children.size() != getArity()) System.err.println("Compile Error. Output has incorrect arity");
 			if (children.get(0).getType() != Type.STRING && children.get(0).getType() != Type.INTEGER) System.err.println("Compiler Error. Arguments to Ouput have incorrect types");
@@ -99,6 +102,22 @@ public class Function extends Token {
 		}
 		public Token copy() {
 			return new Output();
+		}
+	}
+
+	public static class OutputS extends Output {
+		public OutputS() {
+			super("OutputS", 3, Type.VOID);
+		}
+
+		public void compile(List<String> code) {
+			code.add("set TextInverse,(IY + TextFlags)");
+			super.compile(code);
+			code.add("res TextInverse,(IY + TextFlags)");
+		}
+
+		public Token copy() {
+			return new OutputS();
 		}
 	}
 

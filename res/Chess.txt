@@ -1,17 +1,14 @@
-? P = $1 p = $9
-? N = $2 n = $A
-? B = $3 b = $B
-? R = $4 r = $C
-? K = $5 k = $D
-? Q = $6 q = $E
-{$42356324,$11111111,0,0,0,0,$99999999,$CABDEBAC}->L1
-{$0FFFFFFF,$F0FFFFFF,$FF0FFFFF,$FFF0FFFF,$FFFF0FFF,$FFFFF0FF,$FFFFFF0F,$FFFFFFF0}->L2
-0->J
-0->K
+?----------FUNCTIONS---------?
+? P = $1 p = $2
+? N = $3 n = $4
+? B = $5 b = $6
+? R = $7 r = $8
+? K = $9 k = $A
+? Q = $B q = $:
 
 Fun GETCHAR(X,Y) 
 GET(X,Y)->C
-Return(sub(" PNBRQK  pnbrkq",C,1))
+Return(sub(" PpNnBbRrKkQq",C,1))
 End
 
 Fun DLY(T)
@@ -21,6 +18,9 @@ End
 End
 
 Fun GET(X,Y)
+If(X>7 or Y>7)
+Return(_1)
+End
 Return((L1[Y]<<(4*X))>>28)
 End
 
@@ -29,40 +29,68 @@ Fun SET(X,Y,V)
 End
 
 Fun SETMOV(X,Y)
-If(X<7 and Y<7)
-If(Y<4)
-J|(1<<(8*Y+X))->J
-Else
-K|(1<<(8*(Y-4)+X))->K
+If(X>7 or Y>7)
+Return()
 End
+GET(X,Y)->A
+If(A and (A&1)=(C&1))
+Return()
+End
+If(Y<4)
+N|(1<<(8*Y+X))->N
+Else
+M|(1<<(8*(Y-4)+X))->M
 End
 End
 
 Fun GETMOV(X,Y)
 If(Y<4)
-Return(J&(1<<(8*Y+X)))
+Return(N&(1<<(8*Y+X)))
 Else
-Return(K&(1<<(8*(Y-4)+X)))
+Return(M&(1<<(8*(Y-4)+X)))
 End
 End
 
-Fun MOV(S,T,X,Y)
-0->J
-0->K
+Fun LINE(X,Y,I,J)
+Repeat(GET(X,Y))
+X+I->X
+Y+J->Y
+SETMOV(X,Y)
+End
 End
 
+Fun OUT(Y,X,Str1)
+If((X+Y)&1)
+OutputS(Y,X<<1,Str1+GETCHAR(X,Y))
+Else
+Output(Y,X<<1,Str1+GETCHAR(X,Y))
+End
+End
+
+?-------CHESS-PRGM--------?
+
+{$7359B537,$11111111,0,0,0,0,$22222222,$846AC648}->L1
+{$0FFFFFFF,$F0FFFFFF,$FF0FFFFF,$FFF0FFFF,$FFFF0FFF,$FFFFF0FF,$FFFFFF0F,$FFFFFFF0}->L2
 For(Y,0,7)
 For(X,0,7)
-Output(7-Y,2*X+1,GETCHAR(X,Y))
+OUT(Y,X," ")
 End
 End
+
+0->M
+0->N
+3->X
+3->Y
+0->P
+OUT(Y,X,">")
 
 Repeat(K=15)
 	Repeat(K)
 		getKey->K
 	End
+	GET(X,Y)->C
 	If(K<=4)
-		Output(Y,2*X," ")
+		OUT(Y,X,sub(" *",GETMOV(X,Y)=/=0,1))
 		If(K=1 and Y<7)
 			Y+1->Y
 		ElseIf(K=2 and X>0)
@@ -72,23 +100,100 @@ Repeat(K=15)
 		ElseIf(K=4 and Y>0)
 			Y-1->Y
 		End
-		Output(Y,2*X,">")
+		OUT(Y,X,">")
 	ElseIf(K=$36)
-		If(J|K)
+		? The [2nd] key has been pressed
+		If(N or M)
+			? A piece is selected
 			If(GETMOV(X,Y))
-				MOV(S,T,X,Y)
+				? Make the selected move
+				SET(X,Y,GET(S,T))
+				SET(S,T,0)
+				OUT(T,S," ")
+				For(A,0,7)
+					For(B,0,7)
+						If(GETMOV(A,B))
+							OUT(B,A," ")
+						End
+					End
+				End
+				OUT(Y,X,">")
+				0->N
+				0->M
+				not(P)->P
 			End
-		Else
-			GET(X,Y)->C
+		ElseIf(C and (C&1)=P)
+			? A peice has been selected to move
 			X->S
 			Y->T
 			If(C=1)
-			
+				If(not(GET(X,Y+1)))
+					SETMOV(X,Y+1)
+					If(Y=1 and not(GET(X,Y+2)))
+						SETMOV(X,Y+2)
+					End
+				End
+				If(X<7 and GET(X+1,Y+1))
+					SETMOV(X+1,Y+1)
+				End
+				If(X>0 and GET(X-1,Y+1))
+					SETMOV(X-1,Y+1)
+				End	
+			ElseIf(C=2)
+				If(not(GET(X,Y-1)))
+					SETMOV(X,Y-1)
+					If(Y=6 and not(GET(X,Y-2)))
+						SETMOV(X,Y-2)
+					End
+				End
+				If(X<7 and GET(X+1,Y-1))
+					SETMOV(X+1,Y-1)
+				End
+				If(X>0 and GET(X-1,Y-1))
+					SETMOV(X-1,Y-1)
+				End	
+			ElseIf(C<5) ? Knight
+				SETMOV(X+1,Y+2)
+				SETMOV(X+1,Y-2)
+				SETMOV(X-1,Y+2)
+				SETMOV(X-1,Y-2)
+				SETMOV(X+2,Y+1)
+				SETMOV(X+2,Y-1)
+				SETMOV(X-2,Y+1)
+				SETMOV(X-2,Y-1)
+			ElseIf(C<7) ? Bishop
+				LINE(X,Y,1,1)
+				LINE(X,Y,1,0-1)
+				LINE(X,Y,0-1,1)
+				LINE(X,Y,0-1,0-1)
+			ElseIf(C<9) ? Rook
+				LINE(X,Y,0,1)
+				LINE(X,Y,1,0)
+				LINE(X,Y,0-1,0)
+				LINE(X,Y,0,0-1)
+			ElseIf(C<11) ? King
+				SETMOV(X+1,Y-1)
+				SETMOV(X+1,Y)
+				SETMOV(X+1,Y+1)
+				SETMOV(X,Y-1)
+				SETMOV(X,Y+1)
+				SETMOV(X-1,Y-1)
+				SETMOV(X-1,Y)
+				SETMOV(X-1,Y+1)
+			Else ? Queen
+				LINE(X,Y,1,1)
+				LINE(X,Y,1,0-1)
+				LINE(X,Y,0-1,1)
+				LINE(X,Y,0-1,0-1)
+				LINE(X,Y,0,1)
+				LINE(X,Y,1,0)
+				LINE(X,Y,0-1,0)
+				LINE(X,Y,0,0-1)
 			End
-			For(Y,0,7)
-				For(X,0,7)
-					If(GETMOV(X,Y))
-						Output(7-Y,2*X+1,"*")
+			For(A,0,7)
+				For(B,0,7)
+					If(GETMOV(A,B))
+						OUT(B,A,"*")
 					End
 				End
 			End
@@ -96,4 +201,3 @@ Repeat(K=15)
 	End
 End
 ClrHome
-Disp("  Good Game :)")

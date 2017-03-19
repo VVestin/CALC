@@ -33,6 +33,7 @@ public class Lexer {
 		tokenID.put("->", new Operator.Store());
 		tokenID.put("Disp(", new Function.Disp());
 		tokenID.put("Output(", new Function.Output());
+		tokenID.put("OutputS(", new Function.OutputS());
 		tokenID.put("not(", new Function("Not", 1, Type.INTEGER));
 		tokenID.put("str(", new Function("Num2Str", 1, Type.STRING));
 		tokenID.put("sub(", new Function.SubString());
@@ -63,11 +64,12 @@ public class Lexer {
 		tokenID.put("Pause", new Command("Pause"));
 		tokenID.put("Stop", new Command("Stop"));
 		tokenID.put("ClrHome", new Command("ClrHome"));
+		tokenID.put(" ", null);
+		tokenID.put("\t", null);
 		tokenIdentifiers = tokenID;
 	}
 
 	public List<Token> tokenize(String src) {
-		System.out.println("Lexing \n" + src);
 		List<Token> tokens = new LinkedList<Token>();
 		String unrecognized = "";
 		while (src.length() > 0) {
@@ -81,7 +83,9 @@ public class Lexer {
 				if (unrecognized.length() > 0)
 					System.err.println("Syntax Error. Unrecognized Token " + unrecognized);
 				unrecognized = "";
-				tokens.add(tokenIdentifiers.get(id).copy());
+				Token tok = tokenIdentifiers.get(id);
+				if (tok != null)
+					tokens.add(tok.copy());
 				src = src.substring(id.length());
 			} else if (src.startsWith("\"")) {
 				// Tokenizes String Literals

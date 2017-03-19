@@ -4,29 +4,25 @@
 .org progStart-2
 .db $BB,$6D
 	call Setup
-	ld bc,$ACEB
-	ld de,$BDCA
+	ld bc,$48C6
+	ld de,$6A84
 	call PushIntLiteral
-	ld bc,$9999
-	ld de,$9999
+	ld bc,$2222
+	ld de,$2222
 	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
 	ld bc,$1111
 	ld de,$1111
 	call PushIntLiteral
-	ld bc,$2463
-	ld de,$3542
+	ld bc,$37B5
+	ld de,$5973
 	call PushIntLiteral
 	ld a,8
 	call PushListLiteral
@@ -60,108 +56,44 @@
 	call PushListLiteral
 	ld de,ListVar+4
 	call StoStrVar
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+36
-	call StoIntVar
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+40
-	call StoIntVar
-	call FunSETPre
-	ld bc,$0500
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	call FunSET
-	call FunSETPre
-	ld bc,$0600
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0500
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	call FunSET
-	call FunSETPre
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	call FunSET
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$00
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call StoIntVar
 ForLoop1:
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
 	call CompareEqual
 	ld hl,ForLoopEnd1
 	call If
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$00
+	call PushIntLiteral1Byte
 	ld de,IntVar+92
 	call StoIntVar
 ForLoop2:
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
 	call CompareEqual
 	ld hl,ForLoopEnd2
 	call If
-	call FunGETCHARPre
+	call FunOUTPre
+	ld hl,String2
+	call PushStringLiteral
+	ld de,IntVar+92
+	call LoadIntVar
 	ld de,IntVar+96
 	call LoadIntVar
+	call FunOUT
 	ld de,IntVar+92
 	call LoadIntVar
-	call FunGETCHAR
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Add
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+96
-	call LoadIntVar
-	call Negate
-	call Add
-	call Output
-	ld de,IntVar+92
-	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Add
 	ld de,IntVar+92
 	call StoIntVar
@@ -169,14 +101,41 @@ ForLoop2:
 ForLoopEnd2:
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Add
 	ld de,IntVar+96
 	call StoIntVar
 	jp ForLoop1
 ForLoopEnd1:
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+48
+	call StoIntVar
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+52
+	call StoIntVar
+	ld b,$03
+	call PushIntLiteral1Byte
+	ld de,IntVar+92
+	call StoIntVar
+	ld b,$03
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call StoIntVar
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+60
+	call StoIntVar
+	call FunOUTPre
+	ld hl,String3
+	call PushStringLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	call FunOUT
 RepeatLoop1:
 RepeatLoop2:
 	call GetKey
@@ -186,37 +145,52 @@ RepeatLoop2:
 	call LoadIntVar
 	ld hl,RepeatLoop2
 	call If
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	ld de,IntVar+8
+	call StoIntVar
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	scf
 	call CompareEqual
 	ld hl,If1
 	call if
-	ld hl,String2
+	call FunOUTPre
+	ld hl,String4
 	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+92
-	call LoadIntVar
-	call Mult
+	ld b,$01
+	call PushIntLiteral1Byte
+	call FunGETMOVPre
 	ld de,IntVar+96
 	call LoadIntVar
-	call Output
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGETMOV
+	ld b,$00
+	call PushIntLiteral1Byte
+	call Equals
+	call Not
+	call SubString
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	call FunOUT
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Equals
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
 	call Compare
 	call And
@@ -224,9 +198,8 @@ RepeatLoop2:
 	call if
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Add
 	ld de,IntVar+96
 	call StoIntVar
@@ -234,15 +207,13 @@ RepeatLoop2:
 If2:
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$02
+	call PushIntLiteral1Byte
 	call Equals
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$00
+	call PushIntLiteral1Byte
 	scf
 	ccf
 	call Compare
@@ -251,9 +222,8 @@ If2:
 	call If
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Negate
 	call Add
 	ld de,IntVar+92
@@ -262,15 +232,13 @@ If2:
 If3:
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0300
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$03
+	call PushIntLiteral1Byte
 	call Equals
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
 	call Compare
 	call And
@@ -278,9 +246,8 @@ If3:
 	call If
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Add
 	ld de,IntVar+92
 	call StoIntVar
@@ -288,15 +255,13 @@ If3:
 If4:
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	call Equals
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$00
+	call PushIntLiteral1Byte
 	scf
 	ccf
 	call Compare
@@ -305,9 +270,8 @@ If4:
 	call If
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	call Negate
 	call Add
 	ld de,IntVar+96
@@ -315,17 +279,14 @@ If4:
 	jp IfEnd2
 If5:
 IfEnd2:
-	ld hl,String3
+	call FunOUTPre
+	ld hl,String5
 	call PushStringLiteral
-	ld bc,$0200
-	ld de,$0000
-	call PushIntLiteral
 	ld de,IntVar+92
 	call LoadIntVar
-	call Mult
 	ld de,IntVar+96
 	call LoadIntVar
-	call Output
+	call FunOUT
 	jp IfEnd1
 If1:
 	ld de,IntVar+40
@@ -336,11 +297,11 @@ If1:
 	call Equals
 	ld hl,If7
 	call If
-	ld de,IntVar+36
+	ld de,IntVar+52
 	call LoadIntVar
-	ld de,IntVar+40
+	ld de,IntVar+48
 	call LoadIntVar
-	call BitOr
+	call Or
 	ld hl,If8
 	call if
 	call FunGETMOVPre
@@ -351,60 +312,954 @@ If1:
 	call FunGETMOV
 	ld hl,If9
 	call if
-	call FunMOVPre
+	call FunSETPre
+	call FunGETPre
+	ld de,IntVar+76
+	call LoadIntVar
+	ld de,IntVar+72
+	call LoadIntVar
+	call FunGET
 	ld de,IntVar+96
 	call LoadIntVar
 	ld de,IntVar+92
 	call LoadIntVar
+	call FunSET
+	call FunSETPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+76
+	call LoadIntVar
+	ld de,IntVar+72
+	call LoadIntVar
+	call FunSET
+	call FunOUTPre
+	ld hl,String6
+	call PushStringLiteral
+	ld de,IntVar+72
+	call LoadIntVar
+	ld de,IntVar+76
+	call LoadIntVar
+	call FunOUT
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+0
+	call StoIntVar
+ForLoop3:
+	ld de,IntVar+0
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call CompareEqual
+	ld hl,ForLoopEnd3
+	call If
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+4
+	call StoIntVar
+ForLoop4:
+	ld de,IntVar+4
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call CompareEqual
+	ld hl,ForLoopEnd4
+	call If
+	call FunGETMOVPre
+	ld de,IntVar+4
+	call LoadIntVar
+	ld de,IntVar+0
+	call LoadIntVar
+	call FunGETMOV
+	ld hl,If10
+	call if
+	call FunOUTPre
+	ld hl,String7
+	call PushStringLiteral
+	ld de,IntVar+0
+	call LoadIntVar
+	ld de,IntVar+4
+	call LoadIntVar
+	call FunOUT
+	jp IfEnd10
+If10:
+IfEnd10:
+	ld de,IntVar+4
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+4
+	call StoIntVar
+	jp ForLoop4
+ForLoopEnd4:
+	ld de,IntVar+0
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+0
+	call StoIntVar
+	jp ForLoop3
+ForLoopEnd3:
+	call FunOUTPre
+	ld hl,String8
+	call PushStringLiteral
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	call FunOUT
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+52
+	call StoIntVar
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+48
+	call StoIntVar
 	ld de,IntVar+60
 	call LoadIntVar
-	call FunMOV
+	call Not
+	ld de,IntVar+60
+	call StoIntVar
 	jp IfEnd9
 If9:
 IfEnd9:
 	jp IfEnd8
 If8:
+	ld de,IntVar+8
+	call LoadIntVar
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call BitAnd
+	ld de,IntVar+60
+	call LoadIntVar
+	call Equals
+	call And
+	ld hl,If13
+	call If
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+72
+	call StoIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+76
+	call StoIntVar
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Equals
+	ld hl,If14
+	call if
 	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	call Not
+	ld hl,If15
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Equals
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	call Not
+	call And
+	ld hl,If16
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	jp IfEnd16
+If16:
+IfEnd16:
+	jp IfEnd15
+If15:
+IfEnd15:
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunGET
+	call And
+	ld hl,If19
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	jp IfEnd19
+If19:
+IfEnd19:
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$00
+	call PushIntLiteral1Byte
+	scf
+	ccf
+	call Compare
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunGET
+	call And
+	ld hl,If21
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	jp IfEnd21
+If21:
+IfEnd21:
+	jp IfEnd14
+If14:
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Equals
+	ld hl,If23
+	call If
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	call Not
+	ld hl,If24
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$06
+	call PushIntLiteral1Byte
+	call Equals
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	call Not
+	call And
+	ld hl,If25
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	jp IfEnd25
+If25:
+IfEnd25:
+	jp IfEnd24
+If24:
+IfEnd24:
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunGET
+	call And
+	ld hl,If28
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	jp IfEnd28
+If28:
+IfEnd28:
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$00
+	call PushIntLiteral1Byte
+	scf
+	ccf
+	call Compare
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunGET
+	call And
+	ld hl,If30
+	call if
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	jp IfEnd30
+If30:
+IfEnd30:
+	jp IfEnd14
+If23:
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$05
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	ld hl,If32
+	call If
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$02
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	jp IfEnd14
+If32:
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	ld hl,If33
+	call If
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call LoadIntVar
 	ld de,IntVar+92
 	call LoadIntVar
-	call FunGET
-	ld de,IntVar+8
-	call StoIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	jp IfEnd14
+If33:
 	ld de,IntVar+8
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	call Equals
-	ld hl,If12
+	ld b,$09
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	ld hl,If34
+	call If
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	jp IfEnd14
+If34:
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$0B
+	call PushIntLiteral1Byte
+	scf
+	call Compare
+	ld hl,If35
+	call If
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	call FunSETMOV
+	jp IfEnd14
+If35:
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	call FunLINEPre
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Negate
+	call Add
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunLINE
+	jp IfEnd14
+If36:
+IfEnd14:
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+0
+	call StoIntVar
+ForLoop5:
+	ld de,IntVar+0
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call CompareEqual
+	ld hl,ForLoopEnd5
+	call If
+	ld b,$00
+	call PushIntLiteral1Byte
+	ld de,IntVar+4
+	call StoIntVar
+ForLoop6:
+	ld de,IntVar+4
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	call CompareEqual
+	ld hl,ForLoopEnd6
+	call If
+	call FunGETMOVPre
+	ld de,IntVar+4
+	call LoadIntVar
+	ld de,IntVar+0
+	call LoadIntVar
+	call FunGETMOV
+	ld hl,If38
 	call if
-	jp IfEnd12
-If12:
-IfEnd12:
+	call FunOUTPre
+	ld hl,String9
+	call PushStringLiteral
+	ld de,IntVar+0
+	call LoadIntVar
+	ld de,IntVar+4
+	call LoadIntVar
+	call FunOUT
+	jp IfEnd38
+If38:
+IfEnd38:
+	ld de,IntVar+4
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+4
+	call StoIntVar
+	jp ForLoop6
+ForLoopEnd6:
+	ld de,IntVar+0
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call Add
+	ld de,IntVar+0
+	call StoIntVar
+	jp ForLoop5
+ForLoopEnd5:
 	jp IfEnd8
-If11:
+If13:
 IfEnd8:
 	jp IfEnd1
 If7:
 IfEnd1:
 	ld de,IntVar+40
 	call LoadIntVar
-	ld bc,$0F00
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$0F
+	call PushIntLiteral1Byte
 	call Equals
 	ld hl,RepeatLoop1
 	call If
 	call ClrHome
-	ld hl,String4
-	call PushStringLiteral
-	call Disp
 	call Stop
 	
 String1:
-.db 15," PNBRQK  pnbrkq"
+.db 13," PpNnBbRrKkQq"
 FunGETCHARPre:
 	pop hl
 	ld (FuncTemp),hl
@@ -433,9 +1288,8 @@ FunGETCHAR:
 	call StoIntVar
 	ld hl,String1
 	call PushStringLiteral
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
 	ld de,IntVar+8
 	call LoadIntVar
 	call SubString
@@ -505,13 +1359,35 @@ FunGET:
 	call StoIntVar
 	ld hl,(FuncTemp)
 	push hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	ccf
+	call Compare
+	ld de,IntVar+96
+	call LoadIntVar
+	ld b,$07
+	call PushIntLiteral1Byte
+	scf
+	ccf
+	call Compare
+	call Or
+	ld hl,If42
+	call if
+	ld b,$01
+	call PushIntLiteral1Byte
+	jp FunReturnGET
+	jp IfEnd42
+If42:
+IfEnd42:
 	ld de,IntVar+96
 	call LoadIntVar
 	ld hl,(ListVar+2)
 	call ListVarGet
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	ld de,IntVar+92
 	call LoadIntVar
 	call Mult
@@ -570,12 +1446,10 @@ FunSET:
 	call BitAnd
 	ld de,IntVar+84
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
+	ld b,$07
+	call PushIntLiteral1Byte
 	ld de,IntVar+92
 	call LoadIntVar
 	call Negate
@@ -626,38 +1500,67 @@ FunSETMOV:
 	push hl
 	ld de,IntVar+92
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
+	ccf
 	call Compare
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0700
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$07
+	call PushIntLiteral1Byte
 	scf
+	ccf
 	call Compare
+	call Or
+	ld hl,If44
+	call if
+	jp FunReturnSETMOV
+	jp IfEnd44
+If44:
+IfEnd44:
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	ld de,IntVar+0
+	call StoIntVar
+	ld de,IntVar+0
+	call LoadIntVar
+	ld de,IntVar+0
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call BitAnd
+	ld de,IntVar+8
+	call LoadIntVar
+	ld b,$01
+	call PushIntLiteral1Byte
+	call BitAnd
+	call Equals
 	call And
-	ld hl,If16
+	ld hl,If46
 	call if
+	jp FunReturnSETMOV
+	jp IfEnd46
+If46:
+IfEnd46:
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	scf
 	call Compare
-	ld hl,If17
+	ld hl,If48
 	call if
-	ld de,IntVar+36
+	ld de,IntVar+52
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$08
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call LoadIntVar
 	call Mult
@@ -671,23 +1574,20 @@ FunSETMOV:
 	ld b,(hl)
 	call ShiftLeft
 	call BitOr
-	ld de,IntVar+36
+	ld de,IntVar+52
 	call StoIntVar
-	jp IfEnd17
-If17:
-	ld de,IntVar+40
+	jp IfEnd48
+If48:
+	ld de,IntVar+48
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$08
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	call Negate
 	call Add
 	call Mult
@@ -701,14 +1601,11 @@ If17:
 	ld b,(hl)
 	call ShiftLeft
 	call BitOr
-	ld de,IntVar+40
+	ld de,IntVar+48
 	call StoIntVar
-	jp IfEnd17
-If18:
-IfEnd17:
-	jp IfEnd16
-If16:
-IfEnd16:
+	jp IfEnd48
+If49:
+IfEnd48:
 FunReturnSETMOV:
 	pop hl
 	ld (FuncTemp),hl
@@ -738,21 +1635,18 @@ FunGETMOV:
 	push hl
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	scf
 	call Compare
-	ld hl,If21
+	ld hl,If51
 	call if
-	ld de,IntVar+36
+	ld de,IntVar+52
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$08
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call LoadIntVar
 	call Mult
@@ -767,21 +1661,18 @@ FunGETMOV:
 	call ShiftLeft
 	call BitAnd
 	jp FunReturnGETMOV
-	jp IfEnd21
-If21:
-	ld de,IntVar+40
+	jp IfEnd51
+If51:
+	ld de,IntVar+48
 	call LoadIntVar
-	ld bc,$0100
-	ld de,$0000
-	call PushIntLiteral
-	ld bc,$0800
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$01
+	call PushIntLiteral1Byte
+	ld b,$08
+	call PushIntLiteral1Byte
 	ld de,IntVar+96
 	call LoadIntVar
-	ld bc,$0400
-	ld de,$0000
-	call PushIntLiteral
+	ld b,$04
+	call PushIntLiteral1Byte
 	call Negate
 	call Add
 	call Mult
@@ -796,9 +1687,9 @@ If21:
 	call ShiftLeft
 	call BitAnd
 	jp FunReturnGETMOV
-	jp IfEnd21
-If22:
-IfEnd21:
+	jp IfEnd51
+If52:
+IfEnd51:
 FunReturnGETMOV:
 	pop hl
 	ld (FuncRet),hl
@@ -812,46 +1703,153 @@ FunReturnGETMOV:
 	push hl
 	ld hl,(FuncTemp)
 	jp (hl)
-FunMOVPre:
+FunLINEPre:
 	pop hl
 	ld (FuncTemp),hl
-	ld de,IntVar+60
-	call LoadIntVar
 	ld de,IntVar+92
 	call LoadIntVar
 	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+32
+	call LoadIntVar
+	ld de,IntVar+36
 	call LoadIntVar
 	ld hl,(FuncTemp)
 	jp (hl)
-FunMOV:
+FunLINE:
 	pop hl
 	ld (FuncTemp),hl
-	ld de,IntVar+60
-	call StoIntVar
 	ld de,IntVar+92
 	call StoIntVar
 	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+32
+	call StoIntVar
+	ld de,IntVar+36
 	call StoIntVar
 	ld hl,(FuncTemp)
 	push hl
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
+RepeatLoop4:
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+32
+	call LoadIntVar
+	call Add
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+36
+	call LoadIntVar
+	call Add
+	ld de,IntVar+96
+	call StoIntVar
+	call FunSETMOVPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunSETMOV
+	call FunGETPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGET
+	ld hl,RepeatLoop4
+	call If
+FunReturnLINE:
+	pop hl
+	ld (FuncTemp),hl
 	ld de,IntVar+36
 	call StoIntVar
-	ld bc,$0000
-	ld de,$0000
-	call PushIntLiteral
-	ld de,IntVar+40
+	ld de,IntVar+32
 	call StoIntVar
-FunReturnMOV:
+	ld de,IntVar+96
+	call StoIntVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunOUTPre:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,StrVar+2
+	call LoadStrVar
+	ld hl,(FuncTemp)
+	jp (hl)
+FunOUT:
 	pop hl
 	ld (FuncTemp),hl
 	ld de,IntVar+96
 	call StoIntVar
 	ld de,IntVar+92
 	call StoIntVar
-	ld de,IntVar+60
+	ld de,StrVar+2
+	call StoStrVar
+	ld hl,(FuncTemp)
+	push hl
+	ld de,IntVar+92
+	call LoadIntVar
+	ld de,IntVar+96
+	call LoadIntVar
+	call Add
+	ld b,$01
+	call PushIntLiteral1Byte
+	call BitAnd
+	ld hl,If54
+	call if
+	set TextInverse,(IY + TextFlags)
+	ld de,StrVar+2
+	call LoadStrVar
+	call FunGETCHARPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGETCHAR
+	call Concat
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,1
+	call ShiftLeft
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+	res TextInverse,(IY + TextFlags)
+	jp IfEnd54
+If54:
+	ld de,StrVar+2
+	call LoadStrVar
+	call FunGETCHARPre
+	ld de,IntVar+96
+	call LoadIntVar
+	ld de,IntVar+92
+	call LoadIntVar
+	call FunGETCHAR
+	call Concat
+	ld de,IntVar+92
+	call LoadIntVar
+	ld b,1
+	call ShiftLeft
+	ld de,IntVar+96
+	call LoadIntVar
+	call Output
+	jp IfEnd54
+If55:
+IfEnd54:
+FunReturnOUT:
+	pop hl
+	ld (FuncTemp),hl
+	ld de,StrVar+2
+	call StoStrVar
+	ld de,IntVar+92
+	call StoIntVar
+	ld de,IntVar+96
 	call StoIntVar
 	ld hl,(FuncTemp)
 	jp (hl)
@@ -860,7 +1858,17 @@ String2:
 String3:
 .db 1,">"
 String4:
-.db 14,"  Good Game :)"
+.db 2," *"
+String5:
+.db 1,">"
+String6:
+.db 1," "
+String7:
+.db 1," "
+String8:
+.db 1,">"
+String9:
+.db 1,"*"
 	;.module Setup
 	; Does all of the setup necessary to run a program.
 	; Currently this is only setting InitStack for Stop to work
@@ -2618,4 +3626,4 @@ FreePtr:
 	
 Heap:
 .dw $00
-.ds $800, $0 ; 1024 bytes for the heap otherwise OS will put important data there
+.ds $3B0, $0 ; 1024 bytes for the heap otherwise OS will put important data there

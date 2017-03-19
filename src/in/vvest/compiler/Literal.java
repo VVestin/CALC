@@ -26,6 +26,7 @@ public class Literal extends Token {
 					hex = "0" + hex;
 				code.add("ld bc,$" + hex.substring(6) + hex.substring(4, 6));
 				code.add("ld de,$" + hex.substring(2, 4) + hex.substring(0, 2));
+				code.add("call PushIntLiteral");
 			} else {
 				int number = 0;
 				for (int i = 0; i < value.length(); i++) {
@@ -41,10 +42,21 @@ public class Literal extends Token {
 					number /= 16;
 					digit++;
 				}
-				code.add("ld bc,$" + hex[1] + hex[0] + hex[3] + hex[2]);
-				code.add("ld de,$" + hex[5] + hex[4] + hex[7] + hex[6]);
+				if (digit <= 2) {
+					code.add("ld b,$" + hex[1] + hex[0]);
+					code.add("call PushIntLiteral1Byte");
+				} else if (digit <= 4) {
+					code.add("ld bc,$" + hex[1] + hex[0] + hex[3] + hex[2]);
+					code.add("call PushIntLiteral2Byte");
+				} else if (digit <= 6) {
+					code.add("ld bc,$" + hex[1] + hex[0] + hex[3] + hex[2]);
+					code.add("ld d,$" + hex[5] + hex[4]);
+					code.add("call PushIntLiteral3Byte");
+				} else {
+					code.add("ld bc,$" + hex[1] + hex[0] + hex[3] + hex[2]);
+					code.add("ld de,$" + hex[5] + hex[4] + hex[7] + hex[6]);
+				}
 			}
-			code.add("call PushIntLiteral");
 		} else if (type == Type.STRING) {
 			code.add("ld hl," + dataLabel);
 			code.add("call PushStringLiteral");

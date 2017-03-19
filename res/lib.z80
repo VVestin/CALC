@@ -1755,4 +1755,4 @@ FreePtr:
 
 Heap:
 .dw $00
-.ds $800, $0 ; 1024 bytes for the heap otherwise OS will put important data there
+.ds $3B0, $0 ; 1024 bytes for the heap otherwise OS will put important data there
