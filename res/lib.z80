@@ -88,6 +88,43 @@ djnz _FreeIntArg1Loop
 call Free
 ret
 
+;.module Tone
+; Generates a tone with the frequency at the top of the stack
+Tone:
+call FreeIntArg0
+ld a,(IntArg0)
+ld e,a
+ld a,(IntArg0+1)
+ld d,a
+ld hl,30000
+ld c,0
+ld a,0
+call Div24by24
+dec e
+ld b,$FE ; Must be even to ensure closing 
+_ToneLoop:
+push bc 		; 14
+ld b,e  		; 4
+_ToneDelay:
+push bc				; 14
+pop bc				; 10
+push bc				; 14
+pop bc				; 10
+push bc				; 14
+pop bc				; 10
+adc hl,bc			; 15
+djnz _ToneDelay	; 13 	TOTAL = 100
+push bc				; 14
+pop bc				; 10
+push bc				; 14
+pop bc				; 10
+xor	%00000011	; 4
+out	(0),a		; 
+pop bc			; 10
+djnz _ToneLoop	; 13
+ret    
+
+
 ;.module Pause
 ; TODO make it only accept the enter key
 Pause:
@@ -1755,4 +1792,4 @@ FreePtr:
 
 Heap:
 .dw $00
-.ds $3B0, $0 ; 1024 bytes for the heap otherwise OS will put important data there
+.ds $2BD, $0 ; 1024 bytes for the heap otherwise OS will put important data there

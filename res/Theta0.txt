@@ -1,23 +1,23 @@
-{$42356324,$11111111,0,0,0,0,$99999999,$CABDEBAC}->L1
-{$0FFFFFFF,$F0FFFFFF,$FF0FFFFF,$FFF0FFFF,$FFFF0FFF,$FFFFF0FF,$FFFFFF0F,$FFFFFFF0}->L2
-
-Fun GET(X,Y)
-Return((L1[Y]<<(4*X))>>28)
+Fun DLY(T)
+getTime+T->T
+Repeat(getTime=T)
+End
 End
 
-Fun SET(X,Y,V)
-(L1[Y]&L2[X])|(V<<(4*(7-X)))->L1[Y]
-End
+Disp("Hot")
+tone(494)
+Disp("Cross")
+tone(440)
+Disp("Buns")
+tone(392)
+tone(392)
 
-Disp("Hello")
-Disp(GET(1,1))
+DLY(2)
 
-SET(1,1,$5)
-?SET(4,5,$6)
-?SET(2,7,$0)
-
-Disp(GET(1,1))
-
-getTime+5->T
-Repeat(T=getTime)
-End
+Disp("Hot")
+tone(494)
+Disp("Cross")
+tone(440)
+Disp("Buns")
+tone(392)
+tone(392)

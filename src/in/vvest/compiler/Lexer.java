@@ -39,6 +39,7 @@ public class Lexer {
 		tokenID.put("sub(", new Function.SubString());
 		tokenID.put("dim(", new Function("Dimension", 1, Type.INTEGER));
 		tokenID.put("augment(", new Function("Augment", 2, Type.LIST));
+		tokenID.put("tone(", new Function("Tone", 1, Type.VOID));
 		tokenID.put("pop(", new Function.Pop());
 		tokenID.put("Return(", new Function.Return()); // TODO make this a control structure.
 		tokenID.put("Include(", new Function.Include());
