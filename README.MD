@@ -1,5 +1,5 @@
 # CALC
-The __C__ompiled __A__lternative __Language__ for __C__alculator Programming was created as a replacement for TI-BASIC, the built-in, interpreted programming language for TI-84 series calculators.
+The (__C__)ompiled (__A__)lternative (__L__)anguage for (__C__)alculator Programming was created as a replacement for TI-BASIC, the built-in, interpreted programming language for TI-84 series calculators.
 This is a Java-based compiler that takes CALC code as input and outputs a TI-84 program file (.8xp) file that can be executed on a calculator.
 
 ### The Project
